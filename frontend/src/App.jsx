@@ -12,6 +12,7 @@ import Catalogo from './pages/Catalogo';
 import Contacto from './pages/Contacto';
 import Logistica from './pages/Logistica';
 import Login from './pages/Login';
+import DetalleProducto from './pages/DetalleProducto'; // <--- IMPORTANTE: Asegurate de que la ruta sea correcta
 
 function App() {
   const location = useLocation();
@@ -44,6 +45,15 @@ function App() {
             element={
               <Layout>
                 <Catalogo />
+              </Layout>
+            } 
+          />
+          {/* NUEVA RUTA: Sin esto, al recargar en un producto te dará 404 siempre */}
+          <Route 
+            path="/producto/:id" 
+            element={
+              <Layout>
+                <DetalleProducto />
               </Layout>
             } 
           />

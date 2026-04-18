@@ -2,7 +2,7 @@ import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
-// Importación de imágenes
+// IMPORTANTE: Verifica que estos nombres coincidan EXACTAMENTE con tus archivos en /assets
 import imgEquitacion from '../assets/Premium BAL Equitacion.png';
 import imgPolo from '../assets/Premium BAL POLO.png';
 import imgPotrillos from '../assets/Premium BAL Potrillos.png';
@@ -19,7 +19,6 @@ const productosData = {
     tagline: "ENERGÍA EXPLOSIVA",
     desc: "Este alimento balanceado está elaborado con materias primas de primera calidad. Provee niveles de energía balanceados a partir de fibra degradable, almidón y lípidos; y cantidades de proteína de muy alto valor biológico para un adecuado funcionamiento de las masas musculares.",
     recomendacion: "Se recomienda utilizar a un nivel del 0,5 al 1% del peso vivo, repartido en dos comidas después del consumo de heno.",
-    // NUEVOS DATOS TÉCNICOS
     nutricion: [
       { label: "Proteína", value: "13 %" },
       { label: "Energía Digestible", value: "2.900 Kcal" },
@@ -40,23 +39,34 @@ const productosData = {
     ],
     ingredientes: "maíz, avena, cebada, pellet de soja, poroto de soja desactivado, afrechillo de trigo, harina de alfalfa, carbonato de calcio, fosfato mono-bicálcico, cloruro de sodio, óxido de magnesio, microminerales, vitaminas, aminoácidos, antioxidantes, levaduras."
   },
-  // Los demás productos se completarían con la misma estructura...
+  // Repetir estructura para psc, yeguas, potrillos, equitacion, vigor...
 };
 
 const DetalleProducto = () => {
   const { id } = useParams();
+  
+  // Buscamos el producto. Si no existe, usamos "polo" por defecto para evitar pantalla negra.
   const prod = productosData[id] || productosData["polo"];
 
+  // Si aún así algo falla, mostramos un error simple
+  if (!prod) {
+    return (
+      <div className="bg-[#050505] min-h-screen flex items-center justify-center text-white">
+        <p>Producto no encontrado.</p>
+        <Link to="/catalogo" className="ml-4 text-[#D4AF37]">Volver</Link>
+      </div>
+    );
+  }
+
   return (
-    <div className="bg-[#050505] min-h-screen pt-32 pb-20 px-8 text-white font-sans">
+    <div className="bg-[#050505] min-h-screen pt-32 pb-20 px-8 text-white">
       <div className="max-w-6xl mx-auto">
         <Link to="/catalogo" className="text-[#D4AF37] text-sm font-bold uppercase tracking-widest mb-12 inline-block hover:text-white transition-colors">
           ← Volver al Catálogo
         </Link>
         
-        {/* SECCIÓN PRINCIPAL */}
         <div className="grid md:grid-cols-2 gap-16 items-start mb-24">
-          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="relative flex justify-center sticky top-32">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="relative flex justify-center">
             <div className="absolute inset-0 blur-[120px] opacity-30" style={{ backgroundColor: prod.color }}></div>
             <img src={prod.img} alt={prod.name} className="relative z-10 w-full max-w-md h-auto drop-shadow-2xl" />
           </motion.div>
@@ -65,7 +75,7 @@ const DetalleProducto = () => {
             <h2 className="text-[#D4AF37] font-bold tracking-[0.4em] uppercase text-xs mb-3">{prod.tagline}</h2>
             <h1 className="text-7xl font-black uppercase mb-6 tracking-tighter leading-[0.9]">
               {prod.name.split('. ')[0]}<br/>
-              <span className="text-[#D4AF37]">{prod.name.split('. ')[1]}</span>
+              <span className="text-[#D4AF37]">{prod.name.split('. ')[1] || ""}</span>
             </h1>
             <p className="text-gray-400 text-xl leading-relaxed mb-6 font-light">{prod.desc}</p>
             <div className="bg-gray-900/30 border-l-2 border-[#D4AF37] p-4 mb-8">
@@ -81,13 +91,8 @@ const DetalleProducto = () => {
           </motion.div>
         </div>
 
-        {/* SECCIÓN TÉCNICA (TABLAS) */}
-        <motion.div 
-          initial={{ opacity: 0, y: 40 }} 
-          whileInView={{ opacity: 1, y: 0 }}
-          className="grid md:grid-cols-3 gap-12 border-t border-gray-900 pt-16"
-        >
-          {/* APORTES NUTRICIONALES */}
+        {/* TABLAS TÉCNICAS */}
+        <div className="grid md:grid-cols-3 gap-12 border-t border-gray-900 pt-16">
           <div>
             <h3 className="text-white font-bold uppercase tracking-widest text-sm mb-8 flex items-center gap-3">
               <span className="w-8 h-[1px] bg-[#D4AF37]"></span> Aportes Nutricionales
@@ -102,7 +107,6 @@ const DetalleProducto = () => {
             </div>
           </div>
 
-          {/* AMINOÁCIDOS */}
           <div>
             <h3 className="text-white font-bold uppercase tracking-widest text-sm mb-8 flex items-center gap-3">
               <span className="w-8 h-[1px] bg-[#D4AF37]"></span> Aminoácidos (%)
@@ -117,22 +121,13 @@ const DetalleProducto = () => {
             </div>
           </div>
 
-          {/* INGREDIENTES */}
           <div>
             <h3 className="text-white font-bold uppercase tracking-widest text-sm mb-8 flex items-center gap-3">
               <span className="w-8 h-[1px] bg-[#D4AF37]"></span> Composición
             </h3>
-            <p className="text-gray-500 text-sm leading-relaxed mb-6 uppercase tracking-wider">
-              {prod.ingredientes}
-            </p>
-            <div className="p-6 bg-[#0a0a0a] border border-gray-900 rounded-xl mt-4">
-              <p className="text-[10px] text-gray-600 uppercase tracking-widest leading-loose">
-                Calidad garantizada Avangard Equine Professional Elite Line. 
-                Materias primas seleccionadas bajo normas de seguridad biológica.
-              </p>
-            </div>
+            <p className="text-gray-500 text-sm leading-relaxed mb-6 uppercase tracking-wider">{prod.ingredientes}</p>
           </div>
-        </motion.div>
+        </div>
       </div>
     </div>
   );
