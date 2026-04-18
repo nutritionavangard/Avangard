@@ -2,7 +2,7 @@ import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
-// Importación de imágenes con nombres exactos de assets
+// Importación de imágenes - Línea Premium
 import imgEquitacion from '../assets/Premium BAL Equitacion.png';
 import imgPolo from '../assets/Premium BAL POLO.png';
 import imgPotrillos from '../assets/Premium BAL Potrillos.png';
@@ -10,8 +10,11 @@ import imgPSC from '../assets/Premium BAL PSC.png';
 import imgVigor from '../assets/Premium BAL Vigor.png';
 import imgYeguas from '../assets/Premium BAL Yeguas.png';
 
+// Importación de imágenes - Línea Professional
+import imgMantenimiento from '../assets/Professional BAL Mantenimiento.png';
+
 const productosData = {
-"polo": { 
+  "polo": { 
     name: "BAL. POLO", 
     price: "$85.000", 
     img: imgPolo, 
@@ -29,7 +32,6 @@ const productosData = {
       { label: "Cobalto", value: "0,2 mg" }, { label: "Selenio", value: "0,2 mg" },
       { label: "Beta caroteno", value: "12,8 mg" }, { label: "Vitamina A", value: "7.200 UI" },
       { label: "Vitamina D3", value: "1.400 UI" }, { label: "Vitamina E", value: "285 UI" },
-      // Vitaminas Hidrosolubles (Aporte en mg/kg)
       { label: "Biotina", value: "3,3 mg" }, { label: "Colina", value: "1.183,0 mg" },
       { label: "Ác. Fólico", value: "1,8 mg" }, { label: "Niacina", value: "81,4 mg" },
       { label: "Ác. Pantoténico", value: "27,1 mg" }, { label: "Riboflavina", value: "7,8 mg" },
@@ -45,7 +47,7 @@ const productosData = {
     ],
     ingredientes: "maíz, avena, cebada, pellet de soja, poroto de soja desactivado, afrechillo de trigo, harina de alfalfa, carbonato de calcio, fosfato mono-bicálcico, cloruro de sodio, óxido de magnesio, microminerales, vitaminas, aminoácidos, antioxidantes, levaduras, secuestrante de micotoxinas y saborizantes."
   },
-"psc": { 
+  "psc": { 
     name: "BAL. PSC", 
     price: "$88.000", 
     img: imgPSC, 
@@ -63,7 +65,6 @@ const productosData = {
       { label: "Cobalto", value: "0,2 mg" }, { label: "Selenio", value: "0,2 mg" },
       { label: "Beta caroteno", value: "12,8 mg" }, { label: "Vitamina A", value: "7.200 UI" },
       { label: "Vitamina D3", value: "1.440 UI" }, { label: "Vitamina E", value: "285 UI" },
-      // Vitaminas Hidrosolubles (Aporte en mg/kg)
       { label: "Biotina", value: "3,3 mg" }, { label: "Colina", value: "1.183,0 mg" },
       { label: "Ác. Fólico", value: "1,8 mg" }, { label: "Niacina", value: "81,4 mg" },
       { label: "Ác. Pantoténico", value: "27,1 mg" }, { label: "Riboflavina", value: "7,8 mg" },
@@ -88,51 +89,31 @@ const productosData = {
     desc: "Este alimento balanceado está elaborado con materias primas de excelente calidad aportando niveles de energía, proteínas, minerales, aminoácidos y vitaminas para cubrir los requerimientos de las yeguas durante la gestación y la lactancia.",
     recomendacion: "Se recomienda utilizar a un nivel del 0,5 al 1% del peso vivo, repartido en dos comidas después de la ración de heno.",
     nutricion: [
-      { label: "Proteína", value: "14,50 %" },
-      { label: "Energía Digestible", value: "2.900 Kcal" },
-      { label: "Humedad", value: "10 %" },
-      { label: "Calcio", value: "0,75 %" },
-      { label: "Fósforo", value: "0,65 %" },
-      { label: "Sodio", value: "0,10 %" },
-      { label: "Magnesio", value: "0,15 %" },
-      { label: "Hierro", value: "100 mg" },
-      { label: "Cobre", value: "12 mg" },
-      { label: "Zinc", value: "50 mg" },
-      { label: "Manganeso", value: "40 mg" },
-      { label: "Iodo", value: "0,8 mg" },
-      { label: "Cobalto", value: "0,2 mg" },
-      { label: "Selenio", value: "0,25 mg" },
-      { label: "Beta caroteno", value: "32,4 mg" },
-      { label: "Vitamina A", value: "3.300 UI" },
-      { label: "Vitamina D3", value: "400 UI" },
-      { label: "Vitamina E", value: "80 UI" },
-      // Vitaminas Hidrosolubles (Aporte en mg/kg)
-      { label: "Biotina", value: "3,3 mg" },
-      { label: "Colina", value: "1.303,0 mg" },
-      { label: "Ác. Fólico", value: "1,9 mg" },
-      { label: "Niacina", value: "84,6 mg" },
-      { label: "Ác. Pantoténico", value: "27,5 mg" },
-      { label: "Riboflavina", value: "7,9 mg" },
-      { label: "Tiamina", value: "7,5 mg" },
-      { label: "Vitamina B6", value: "9,2 mg" },
-      { label: "Vitamina B12", value: "322,0 mg" },
-      { label: "Vitamina C", value: "140,0 mg" }
+      { label: "Proteína", value: "14,50 %" }, { label: "Energía Digestible", value: "2.900 Kcal" },
+      { label: "Humedad", value: "10 %" }, { label: "Calcio", value: "0,75 %" },
+      { label: "Fósforo", value: "0,65 %" }, { label: "Sodio", value: "0,10 %" },
+      { label: "Magnesio", value: "0,15 %" }, { label: "Hierro", value: "100 mg" },
+      { label: "Cobre", value: "12 mg" }, { label: "Zinc", value: "50 mg" },
+      { label: "Manganeso", value: "40 mg" }, { label: "Iodo", value: "0,8 mg" },
+      { label: "Cobalto", value: "0,2 mg" }, { label: "Selenio", value: "0,25 mg" },
+      { label: "Beta caroteno", value: "32,4 mg" }, { label: "Vitamina A", value: "3.300 UI" },
+      { label: "Vitamina D3", value: "400 UI" }, { label: "Vitamina E", value: "80 UI" },
+      { label: "Biotina", value: "3,3 mg" }, { label: "Colina", value: "1.303,0 mg" },
+      { label: "Ác. Fólico", value: "1,9 mg" }, { label: "Niacina", value: "84,6 mg" },
+      { label: "Ác. Pantoténico", value: "27,5 mg" }, { label: "Riboflavina", value: "7,9 mg" },
+      { label: "Tiamina", value: "7,5 mg" }, { label: "Vitamina B6", value: "9,2 mg" },
+      { label: "Vitamina B12", value: "322,0 mg" }, { label: "Vitamina C", value: "140,0 mg" }
     ],
     aminoacidos: [
-      { label: "Arginina", value: "1,07" },
-      { label: "Histidina", value: "0,43" },
-      { label: "Isoleucina", value: "0,64" },
-      { label: "Leucina", value: "1,24" },
-      { label: "Lisina", value: "0,76" },
-      { label: "Metionina", value: "0,27" },
-      { label: "Cistina", value: "0,33" },
-      { label: "Fenilalanina", value: "0,79" },
-      { label: "Tirosina", value: "0,54" },
-      { label: "Valina", value: "0,60" }
+      { label: "Arginina", value: "1,07" }, { label: "Histidina", value: "0,43" },
+      { label: "Isoleucina", value: "0,64" }, { label: "Leucina", value: "1,24" },
+      { label: "Lisina", value: "0,76" }, { label: "Metionina", value: "0,27" },
+      { label: "Cistina", value: "0,33" }, { label: "Fenilalanina", value: "0,79" },
+      { label: "Tirosina", value: "0,54" }, { label: "Valina", value: "0,60" }
     ],
     ingredientes: "maíz, avena, cebada, pellet de soja, poroto de soja desactivado, afrechillo de trigo, harina de alfalfa, Macro y Microminerales de alta biodisponibilidad en equinos, vitaminas, levaduras, secuestrante de micotoxinas, antioxidantes y saborizantes."
   },
-"potrillos": { 
+  "potrillos": { 
     name: "BAL. POTRILLOS", 
     price: "$95.000", 
     img: imgPotrillos, 
@@ -150,7 +131,6 @@ const productosData = {
       { label: "Cobalto", value: "0,2 mg" }, { label: "Selenio", value: "0,3 mg" },
       { label: "Beta caroteno", value: "10,9 mg" }, { label: "Vitamina A", value: "3.500 UI" },
       { label: "Vitamina D3", value: "450 UI" }, { label: "Vitamina E", value: "80 UI" },
-      // Vitaminas Hidrosolubles (Aporte en mg/kg)
       { label: "Biotina", value: "3,3 mg" }, { label: "Colina", value: "1.386,0 mg" },
       { label: "Ác. Fólico", value: "1,9 mg" }, { label: "Niacina", value: "82,7 mg" },
       { label: "Ác. Pantoténico", value: "27,7 mg" }, { label: "Riboflavina", value: "7,9 mg" },
@@ -166,20 +146,78 @@ const productosData = {
     ],
     ingredientes: "maíz, avena, cebada, pellet de soja, poroto de soja desactivado, afrechillo de trigo, harina de alfalfa, carbonato de calcio, fosfato mono-bicálcico, cloruro de sodio, óxido de magnesio, microminerales, aminoácidos, vitaminas, antioxidantes, secuestrante de micotoxinas, levadura y saborizantes."
   },
+  "mantenimiento": { 
+    name: "BAL. MANTENIMIENTO", 
+    price: "$72.000", 
+    img: imgMantenimiento, 
+    color: "#D4AF37", 
+    tagline: "EQUILIBRIO DIARIO",
+    desc: "Este producto pertenece a la línea Professional. Alimento balanceado elaborado con materias primas de excelente calidad. Provee niveles de energía, proteínas, minerales y vitaminas para cubrir los requerimientos de mantenimiento del caballo adulto.",
+    recomendacion: "Se recomienda utilizar a un nivel del 0,5 al 1% del peso vivo, repartido en dos comidas después del suministro de heno.",
+    nutricion: [
+      { label: "Proteína", value: "11 %" }, { label: "Energía Digestible", value: "2.600 Kcal" },
+      { label: "Humedad", value: "10 %" }, { label: "Calcio", value: "0,70 %" },
+      { label: "Fósforo", value: "0,60 %" }, { label: "Sodio", value: "0,15 %" },
+      { label: "Magnesio", value: "0,20 %" }, { label: "Hierro", value: "60 mg" },
+      { label: "Cobre", value: "12 mg" }, { label: "Zinc", value: "50 mg" },
+      { label: "Manganeso", value: "50 mg" }, { label: "Iodo", value: "0,8 mg" },
+      { label: "Cobalto", value: "0,2 mg" }, { label: "Selenio", value: "0,2 mg" },
+      { label: "Beta caroteno", value: "5,3 mg" }, { label: "Vitamina A", value: "3.500 UI" },
+      { label: "Vitamina D3", value: "350 UI" }, { label: "Vitamina E", value: "45 UI" },
+      { label: "Biotina", value: "3,3 mg" }, { label: "Colina", value: "1.060,0 mg" },
+      { label: "Ác. Fólico", value: "1,7 mg" }, { label: "Niacina", value: "81,0 mg" },
+      { label: "Ác. Pantoténico", value: "26,6 mg" }, { label: "Riboflavina", value: "7,8 mg" },
+      { label: "Tiamina", value: "7,4 mg" }, { label: "Vitamina B6", value: "8,8 mg" },
+      { label: "Vitamina B12", value: "322,0 mg" }, { label: "Vitamina C", value: "140,0 mg" }
+    ],
+    aminoacidos: [
+      { label: "Arginina", value: "0,76" }, { label: "Histidina", value: "0,31" },
+      { label: "Isoleucina", value: "0,46" }, { label: "Leucina", value: "0,93" },
+      { label: "Lisina", value: "0,51" }, { label: "Metionina", value: "0,20" },
+      { label: "Cistina", value: "0,27" }, { label: "Fenilalanina", value: "0,59" },
+      { label: "Tirosina", value: "0,40" }, { label: "Valina", value: "0,45" }
+    ],
+    ingredientes: "maíz, avena, cebada, pellet de soja, afrechillo de trigo, harina de alfalfa, carbonato de calcio, fosfato mono-bicálcico, cloruro de sodio, óxido de magnesio, microminerales, vitaminas, antioxidantes, levaduras, secuestrante de micotoxinas y saborizantes."
+  },
+  "deporte": { 
+    name: "BAL. DEPORTE", 
+    price: "$78.000", // Precio estimado, ajustar si es necesario
+    img: imgDeporte, 
+    color: "#D4AF37", 
+    tagline: "RENDIMIENTO CONSTANTE",
+    desc: "Este producto pertenece a la línea Professional. Alimento balanceado elaborado con materias primas de excelente calidad. Provee niveles de energía, proteínas, minerales y vitaminas necesarios para cubrir los requerimientos de caballos en entrenamiento y competencia.",
+    recomendacion: "Se recomienda utilizar a un nivel del 0,5 al 1,2% del peso vivo, repartido en dos o tres comidas diarias, siempre después del suministro de heno.",
+    nutricion: [
+      { label: "Proteína", value: "12 %" }, { label: "Energía Digestible", value: "2.800 Kcal" },
+      { label: "Humedad", value: "10 %" }, { label: "Calcio", value: "0,70 %" },
+      { label: "Fósforo", value: "0,60 %" }, { label: "Sodio", value: "0,25 %" },
+      { label: "Magnesio", value: "0,15 %" }, { label: "Hierro", value: "80 mg" },
+      { label: "Cobre", value: "12 mg" }, { label: "Zinc", value: "50 mg" },
+      { label: "Manganeso", value: "40 mg" }, { label: "Iodo", value: "0,8 mg" },
+      { label: "Cobalto", value: "0,2 mg" }, { label: "Selenio", value: "0,2 mg" },
+      { label: "Beta caroteno", value: "12,1 mg" }, { label: "Vitamina A", value: "6.800 UI" },
+      { label: "Vitamina D3", value: "1.360 UI" }, { label: "Vitamina E", value: "270 UI" },
+      // Vitaminas Hidrosolubles (Aporte en mg/kg)
+      { label: "Biotina", value: "3,3 mg" }, { label: "Colina", value: "1.154,0 mg" },
+      { label: "Ác. Fólico", value: "1,8 mg" }, { label: "Niacina", value: "81,3 mg" },
+      { label: "Ác. Pantoténico", value: "27,0 mg" }, { label: "Riboflavina", value: "7,8 mg" },
+      { label: "Tiamina", value: "7,4 mg" }, { label: "Vitamina B6", value: "9,0 mg" },
+      { label: "Vitamina B12", value: "322,0 mg" }, { label: "Vitamina C", value: "140,0 mg" }
+    ],
+    aminoacidos: [
+      { label: "Arginina", value: "0,86" }, { label: "Histidina", value: "0,35" },
+      { label: "Isoleucina", value: "0,52" }, { label: "Leucina", value: "1,05" },
+      { label: "Lisina", value: "0,64" }, { label: "Metionina", value: "0,22" },
+      { label: "Cistina", value: "0,30" }, { label: "Fenilalanina", value: "0,66" },
+      { label: "Tirosina", value: "0,45" }, { label: "Valina", value: "0,51" }
+    ],
+    ingredientes: "maíz, avena, cebada, pellet de soja, afrechillo de trigo, harina de alfalfa, carbonato de calcio, fosfato mono-bicálcico, cloruro de sodio, óxido de magnesio, microminerales, vitaminas, antioxidantes, levaduras, secuestrante de micotoxinas y saborizantes."
+  },
 };
 
 const DetalleProducto = () => {
   const { id } = useParams();
   const prod = productosData[id] || productosData["polo"];
-
-  if (!prod) {
-    return (
-      <div className="bg-[#050505] min-h-screen flex items-center justify-center text-white">
-        <p>Producto no encontrado.</p>
-        <Link to="/catalogo" className="ml-4 text-[#D4AF37]">Volver</Link>
-      </div>
-    );
-  }
 
   return (
     <div className="bg-[#050505] min-h-screen pt-32 pb-20 px-8 text-white">
