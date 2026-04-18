@@ -15,7 +15,8 @@ const stockSchema = new mongoose.Schema({
     // Cantidad total actual en este registro
     quantity: { 
         type: Number, 
-        default: 0 
+        default: 0,
+        min: 0 // Evita que el stock total sea negativo
     },
     warehouse: { 
         type: String, 
@@ -25,23 +26,27 @@ const stockSchema = new mongoose.Schema({
     movements: [{
         type: { 
             type: String, 
-            enum: ['Ingreso', 'Egreso'], 
+            // Agregamos 'Entrega' para que coincida con el controlador de Logística
+            enum: ['Ingreso', 'Egreso', 'Entrega'], 
             required: true 
         },
         amount: { 
             type: Number, 
-            required: true 
+            required: true,
+            min: 1 
         },
         date: { 
             type: Date, 
             default: Date.now 
         },
         operator: { 
-            type: String 
-        }, // El Admin que lo registra (vos)
+            type: String,
+            default: 'Admin'
+        }, 
         recipient: { 
-            type: String 
-        }, // A quién se le entrega o quién trae la mercadería
+            type: String,
+            default: 'Depósito Central'
+        }, 
         note: { 
             type: String 
         }

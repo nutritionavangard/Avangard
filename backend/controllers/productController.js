@@ -64,3 +64,28 @@ exports.createProduct = async (req, res) => {
         });
     }
 };
+
+// @desc    Actualizar producto (Precio, Descripción, etc.)
+// @route   PUT /api/products/:id
+exports.updateProduct = async (req, res) => {
+    try {
+        const { price, desc, description, name, color, line } = req.body;
+        
+        const product = await Product.findById(req.params.id);
+
+        if (product) {
+            product.name = name || product.name;
+            product.price = price !== undefined ? price : product.price;
+            product.desc = desc || description || product.desc;
+            product.color = color || product.color;
+            product.line = line || product.line;
+
+            const updatedProduct = await product.save();
+            res.json(updatedProduct);
+        } else {
+            res.status(404).json({ message: 'Producto no encontrado' });
+        }
+    } catch (error) {
+        res.status(400).json({ message: 'Error al actualizar el producto', details: error.message });
+    }
+};

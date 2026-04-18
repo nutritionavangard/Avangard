@@ -33,16 +33,18 @@ exports.updateStock = async (req, res) => {
                 product: productId, 
                 productName: productData.name,
                 quantity: 0, 
-                warehouse: 'San Miguel', //
+                warehouse: 'San Miguel', 
                 movements: [] 
             });
         }
 
         // 2. Lógica de cálculo (Ingreso o Egreso)
         const numericAmount = Number(amount);
-        if (type.toLowerCase() === 'ingreso') {
+        const actionType = type.toLowerCase();
+
+        if (actionType === 'ingreso') {
             stock.quantity += numericAmount;
-        } else if (type.toLowerCase() === 'entrega' || type.toLowerCase() === 'egreso') {
+        } else if (actionType === 'entrega' || actionType === 'egreso') {
             if (stock.quantity < numericAmount) {
                 return res.status(400).json({ message: 'Stock insuficiente para realizar la entrega' });
             }
@@ -77,5 +79,19 @@ exports.updateStock = async (req, res) => {
     } catch (error) {
         console.error("Error en updateStock:", error);
         res.status(400).json({ message: 'Error en la actualización de stock y sincronización' });
+    }
+};
+
+// @desc    Obtener solo el historial de movimientos de un producto específico
+// @route   GET /api/stock/movements/:productId
+exports.getMovementsByProduct = async (req, res) => {
+    try {
+        const stock = await Stock.findOne({ product: req.params.productId });
+        if (!stock) {
+            return res.status(404).json({ message: 'Historial no encontrado' });
+        }
+        res.json(stock.movements);
+    } catch (error) {
+        res.status(500).json({ message: 'Error al obtener movimientos' });
     }
 };

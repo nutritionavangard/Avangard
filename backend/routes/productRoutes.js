@@ -1,6 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const { getStockStatus, updateStock } = require('../controllers/stockController');
+const { 
+    getStockStatus, 
+    updateStock, 
+    getMovementsByProduct 
+} = require('../controllers/stockController');
 const { protect } = require('../middleware/authMiddleware');
 
 // @route   GET /api/stock
@@ -12,5 +16,10 @@ router.get('/', protect, getStockStatus);
 // @desc    Registrar un Ingreso o Egreso (Entrega) de mercadería
 // @access  Privado (Solo Admin)
 router.post('/update', protect, updateStock);
+
+// @route   GET /api/stock/movements/:productId
+// @desc    Obtener el historial de movimientos (Log) de un producto específico
+// @access  Privado (Solo Admin)
+router.get('/movements/:productId', protect, getMovementsByProduct);
 
 module.exports = router;
