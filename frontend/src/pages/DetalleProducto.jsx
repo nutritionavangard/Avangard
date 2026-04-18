@@ -11,24 +11,37 @@ import imgVigor from '../assets/Premium BAL Vigor.png';
 import imgYeguas from '../assets/Premium BAL Yeguas.png';
 
 const productosData = {
-  "polo": { 
+"polo": { 
     name: "BAL. POLO", 
     price: "$85.000", 
     img: imgPolo, 
     color: "#D4AF37", 
     tagline: "ENERGÍA EXPLOSIVA",
-    desc: "Este alimento balanceado está elaborado con materias primas de primera calidad. Provee niveles de energía balanceados a partir de fibra degradable, almidón y lípidos; y cantidades de proteína de muy alto valor biológico para un adecuado funcionamiento de las masas musculares.",
+    desc: "Este alimento balanceado está elaborado con materias primas de primera calidad. Provee niveles de energía balanceados a partir de fibra degradable, almidón y lípidos; y cantidades de proteína de muy alto valor biológico para un adecuado funcionamiento de las masas musculares. Proporciona minerales y vitaminas necesarios para un excelente rendimiento deportivo.",
     recomendacion: "Se recomienda utilizar a un nivel del 0,5 al 1% del peso vivo, repartido en dos comidas después del consumo de heno.",
     nutricion: [
       { label: "Proteína", value: "13 %" }, { label: "Energía Digestible", value: "2.900 Kcal" },
       { label: "Humedad", value: "10 %" }, { label: "Calcio", value: "0,70 %" },
       { label: "Fósforo", value: "0,60 %" }, { label: "Sodio", value: "0,30 %" },
       { label: "Magnesio", value: "0,20 %" }, { label: "Hierro", value: "80 mg" },
-      { label: "Vitamina A", value: "7.200 UI" }, { label: "Vitamina E", value: "285 UI" }
+      { label: "Cobre", value: "12 mg" }, { label: "Zinc", value: "50 mg" },
+      { label: "Manganeso", value: "45 mg" }, { label: "Iodo", value: "0,8 mg" },
+      { label: "Cobalto", value: "0,2 mg" }, { label: "Selenio", value: "0,2 mg" },
+      { label: "Beta caroteno", value: "12,8 mg" }, { label: "Vitamina A", value: "7.200 UI" },
+      { label: "Vitamina D3", value: "1.400 UI" }, { label: "Vitamina E", value: "285 UI" },
+      // Vitaminas Hidrosolubles (Aporte en mg/kg)
+      { label: "Biotina", value: "3,3 mg" }, { label: "Colina", value: "1.183,0 mg" },
+      { label: "Ác. Fólico", value: "1,8 mg" }, { label: "Niacina", value: "81,4 mg" },
+      { label: "Ác. Pantoténico", value: "27,1 mg" }, { label: "Riboflavina", value: "7,8 mg" },
+      { label: "Tiamina", value: "7,4 mg" }, { label: "Vitamina B6", value: "9,0 mg" },
+      { label: "Vitamina B12", value: "322,0 mg" }, { label: "Vitamina C", value: "140,0 mg" }
     ],
     aminoacidos: [
-      { label: "Arginina", value: "0,94" }, { label: "Isoleucina", value: "0,56" },
-      { label: "Leucina", value: "1,13" }, { label: "Lisina", value: "0,71" }
+      { label: "Arginina", value: "0,94" }, { label: "Histidina", value: "0,38" },
+      { label: "Isoleucina", value: "0,56" }, { label: "Leucina", value: "1,13" },
+      { label: "Lisina", value: "0,71" }, { label: "Metionina", value: "0,24" },
+      { label: "Cistina", value: "0,31" }, { label: "Fenilalanina", value: "0,71" },
+      { label: "Tirosina", value: "0,48" }, { label: "Valina", value: "0,54" }
     ],
     ingredientes: "maíz, avena, cebada, pellet de soja, poroto de soja desactivado, afrechillo de trigo, harina de alfalfa, carbonato de calcio, fosfato mono-bicálcico, cloruro de sodio, óxido de magnesio, microminerales, vitaminas, aminoácidos, antioxidantes, levaduras, secuestrante de micotoxinas y saborizantes."
   },
@@ -119,27 +132,40 @@ const productosData = {
     ],
     ingredientes: "maíz, avena, cebada, pellet de soja, poroto de soja desactivado, afrechillo de trigo, harina de alfalfa, Macro y Microminerales de alta biodisponibilidad en equinos, vitaminas, levaduras, secuestrante de micotoxinas, antioxidantes y saborizantes."
   },
-  "potrillos": { 
+"potrillos": { 
     name: "BAL. POTRILLOS", 
     price: "$95.000", 
     img: imgPotrillos, 
     color: "#D4AF37", 
     tagline: "DESARROLLO ESQUELÉTICO",
-    desc: "Provee niveles de energía equilibrados y proteína de muy alto valor biológico, asegurando el desarrollo esquelético y muscular del potrillo para alta competencia.",
+    desc: "Este alimento balanceado está elaborado con materias primas de óptima calidad. Provee niveles de energía equilibrados a partir de fibra degradable, almidón y lípidos; y cantidades de proteína de muy alto valor biológico, incluyendo además minerales, vitaminas y aminoácidos, todo lo que asegura el desarrollo esquelético y muscular del potrillo para alta competencia.",
     recomendacion: "Se recomienda utilizar a un nivel del 0,5 al 1% del peso vivo, repartido en dos comidas después del suministro de heno.",
     nutricion: [
       { label: "Proteína", value: "17 %" }, { label: "Energía Digestible", value: "2.800 Kcal" },
       { label: "Humedad", value: "10 %" }, { label: "Calcio", value: "0,72 %" },
       { label: "Fósforo", value: "0,63 %" }, { label: "Sodio", value: "0,10 %" },
       { label: "Magnesio", value: "0,15 %" }, { label: "Hierro", value: "120 mg" },
-      { label: "Vitamina A", value: "3.500 UI" }, { label: "Vitamina E", value: "80 UI" }
+      { label: "Cobre", value: "12 mg" }, { label: "Zinc", value: "50 mg" },
+      { label: "Manganeso", value: "30 mg" }, { label: "Iodo", value: "0,8 mg" },
+      { label: "Cobalto", value: "0,2 mg" }, { label: "Selenio", value: "0,3 mg" },
+      { label: "Beta caroteno", value: "10,9 mg" }, { label: "Vitamina A", value: "3.500 UI" },
+      { label: "Vitamina D3", value: "450 UI" }, { label: "Vitamina E", value: "80 UI" },
+      // Vitaminas Hidrosolubles (Aporte en mg/kg)
+      { label: "Biotina", value: "3,3 mg" }, { label: "Colina", value: "1.386,0 mg" },
+      { label: "Ác. Fólico", value: "1,9 mg" }, { label: "Niacina", value: "82,7 mg" },
+      { label: "Ác. Pantoténico", value: "27,7 mg" }, { label: "Riboflavina", value: "7,9 mg" },
+      { label: "Tiamina", value: "7,4 mg" }, { label: "Vitamina B6", value: "9,2 mg" },
+      { label: "Vitamina B12", value: "322,0 mg" }, { label: "Vitamina C", value: "140,0 mg" }
     ],
     aminoacidos: [
       { label: "Arginina", value: "1,19" }, { label: "Histidina", value: "0,47" },
-      { label: "Isoleucina", value: "0,71" }, { label: "Lisina", value: "0,95" }
+      { label: "Isoleucina", value: "0,71" }, { label: "Leucina", value: "1,37" },
+      { label: "Lisina", value: "0,95" }, { label: "Metionina", value: "0,28" },
+      { label: "Cistina", value: "0,35" }, { label: "Fenilalanina", value: "0,87" },
+      { label: "Tirosina", value: "0,60" }, { label: "Valina", value: "0,67" }
     ],
     ingredientes: "maíz, avena, cebada, pellet de soja, poroto de soja desactivado, afrechillo de trigo, harina de alfalfa, carbonato de calcio, fosfato mono-bicálcico, cloruro de sodio, óxido de magnesio, microminerales, aminoácidos, vitaminas, antioxidantes, secuestrante de micotoxinas, levadura y saborizantes."
-  }
+  },
 };
 
 const DetalleProducto = () => {
