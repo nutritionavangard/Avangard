@@ -32,24 +32,37 @@ const productosData = {
     ],
     ingredientes: "maíz, avena, cebada, pellet de soja, poroto de soja desactivado, afrechillo de trigo, harina de alfalfa, carbonato de calcio, fosfato mono-bicálcico, cloruro de sodio, óxido de magnesio, microminerales, vitaminas, aminoácidos, antioxidantes, levaduras, secuestrante de micotoxinas y saborizantes."
   },
-  "psc": { 
+"psc": { 
     name: "BAL. PSC", 
     price: "$88.000", 
     img: imgPSC, 
     color: "#D4AF37", 
     tagline: "MAXIMIZA EL POTENCIAL",
-    desc: "Provee niveles de energía balanceados a partir de fibra degradable, almidón y lípidos; y cantidades de proteína de muy alto valor biológico para un adecuado funcionamiento de las masas musculares.",
-    recomendacion: "Se recomienda utilizar a un nivel del 0,5% (mantenimiento), del 1 a 1,5% (competición) del peso vivo, repartido en dos o tres comidas después del consumo de heno.",
+    desc: "Este alimento balanceado está elaborado con materias primas de primera calidad. Provee niveles de energía balanceados a partir de fibra degradable, almidón y lípidos; y cantidades de proteína de muy alto valor biológico, para un adecuado funcionamiento de las masas musculares. Proporciona minerales y vitaminas necesarios para un excelente rendimiento deportivo.",
+    recomendacion: "Se recomienda utilizar a un nivel del 0,5% (mantenimiento), del 1 a 1,5% (competición, según nivel de entrenamiento) del peso vivo, repartido en dos o tres comidas después del consumo de heno. No dar más del 0.5% de peso vivo por comida.",
     nutricion: [
       { label: "Proteína", value: "13 %" }, { label: "Energía Digestible", value: "2.900 Kcal" },
       { label: "Humedad", value: "10 %" }, { label: "Calcio", value: "0,70 %" },
       { label: "Fósforo", value: "0,60 %" }, { label: "Sodio", value: "0,40 %" },
       { label: "Magnesio", value: "0,15 %" }, { label: "Hierro", value: "80 mg" },
-      { label: "Vitamina A", value: "7.200 UI" }, { label: "Vitamina E", value: "285 UI" }
+      { label: "Cobre", value: "12 mg" }, { label: "Zinc", value: "50 mg" },
+      { label: "Manganeso", value: "42 mg" }, { label: "Iodo", value: "0,8 mg" },
+      { label: "Cobalto", value: "0,2 mg" }, { label: "Selenio", value: "0,2 mg" },
+      { label: "Beta caroteno", value: "12,8 mg" }, { label: "Vitamina A", value: "7.200 UI" },
+      { label: "Vitamina D3", value: "1.440 UI" }, { label: "Vitamina E", value: "285 UI" },
+      // Vitaminas Hidrosolubles (Aporte en mg/kg)
+      { label: "Biotina", value: "3,3 mg" }, { label: "Colina", value: "1.183,0 mg" },
+      { label: "Ác. Fólico", value: "1,8 mg" }, { label: "Niacina", value: "81,4 mg" },
+      { label: "Ác. Pantoténico", value: "27,1 mg" }, { label: "Riboflavina", value: "7,8 mg" },
+      { label: "Tiamina", value: "7,4 mg" }, { label: "Vitamina B6", value: "9,0 mg" },
+      { label: "Vitamina B12", value: "322,0 mg" }, { label: "Vitamina C", value: "140,0 mg" }
     ],
     aminoacidos: [
       { label: "Arginina", value: "0,94" }, { label: "Histidina", value: "0,38" },
-      { label: "Isoleucina", value: "0,56" }, { label: "Lisina", value: "0,71" }
+      { label: "Isoleucina", value: "0,56" }, { label: "Leucina", value: "1,13" },
+      { label: "Lisina", value: "0,71" }, { label: "Metionina", value: "0,24" },
+      { label: "Cistina", value: "0,31" }, { label: "Fenilalanina", value: "0,71" },
+      { label: "Tirosina", value: "0,48" }, { label: "Valina", value: "0,54" }
     ],
     ingredientes: "maíz, avena, cebada, pellet de soja, poroto de soja desactivado, afrechillo de trigo, harina de alfalfa, carbonato de calcio, fosfato mono-bicálcico, cloruro de sodio, óxido de magnesio, microminerales, vitaminas, lisina, levaduras, secuestrante de micotoxinas y saborizantes."
   },
