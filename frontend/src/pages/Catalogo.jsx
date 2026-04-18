@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ProductCard from '../components/ProductCard';
 
-// Importación de imágenes (se mantienen para matchear con los productos de la DB)
+// Importación de imágenes
 import imgEquitacion from '../assets/Premium BAL Equitacion.png';
 import imgPolo from '../assets/Premium BAL POLO.png';
 import imgPotrillos from '../assets/Premium BAL Potrillos.png';
@@ -17,7 +17,6 @@ const Catalogo = () => {
   const [productos, setProductos] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Mapeo de imágenes para asignar según el nombre o ID que venga de la DB
   const imageMap = {
     "polo": imgPolo,
     "psc": imgPSC,
@@ -29,20 +28,25 @@ const Catalogo = () => {
     "deporte": imgDeporte
   };
 
-  // 1. Cargar productos desde la DB
   useEffect(() => {
     const fetchProductos = async () => {
       try {
         const response = await fetch('/api/products');
+        if (!response.ok) throw new Error('Error en la red');
         const data = await response.json();
         
-        // Inyectamos las imágenes locales a los datos que vienen de la DB
-        const productosConImagen = data.map(p => ({
-          ...p,
-          // Buscamos la imagen en el mapa usando una versión simplificada del nombre
-          displayImage: imageMap[p.name.toLowerCase().split(' ').pop()] || imgPolo,
-          color: p.line === 'Premium' ? "#D4AF37" : "#2563eb"
-        }));
+        const productosConImagen = data.map(p => {
+          // Normalizamos el nombre para el mapa de imágenes
+          const nameLower = p.name.toLowerCase();
+          const key = Object.keys(imageMap).find(k => nameLower.includes(k)) || "polo";
+
+          return {
+            ...p,
+            displayImage: imageMap[key],
+            // Normalizamos el color basándonos en la línea (ignorando mayúsculas)
+            color: p.line.toLowerCase() === 'premium' ? "#D4AF37" : "#2563eb"
+          };
+        });
 
         setProductos(productosConImagen);
         setLoading(false);
@@ -60,9 +64,9 @@ const Catalogo = () => {
     { id: 'PROFESSIONAL', label: 'Línea Professional', color: '#2563eb' }
   ];
 
-  // Filtrar productos según la línea seleccionada
+  // CORRECCIÓN CLAVE: Normalizamos ambos lados de la comparación a minúsculas
   const productosFiltrados = productos.filter(p => 
-    p.line.toUpperCase() === lineaActiva
+    p.line && p.line.toLowerCase() === lineaActiva.toLowerCase()
   );
 
   if (loading) return <div className="bg-[#050505] min-h-screen pt-40 text-center font-black uppercase text-[#D4AF37]">Cargando Catálogo...</div>;
@@ -71,7 +75,6 @@ const Catalogo = () => {
     <div className="bg-[#050505] min-h-screen pt-32 pb-20 px-8">
       <div className="max-w-7xl mx-auto">
         
-        {/* NAVEGACIÓN DE LÍNEAS */}
         <div className="flex flex-wrap gap-4 mb-16 justify-center md:justify-start">
           {botones.map((btn) => (
             <button
@@ -118,19 +121,18 @@ const Catalogo = () => {
                     key={producto._id} 
                     product={{
                       ...producto,
-                      image: producto.displayImage // Usamos la imagen mapeada localmente
+                      image: producto.displayImage
                     }} 
                   />
                 ))
               ) : (
                 <div className="py-20 text-center col-span-2 border border-dashed border-gray-900 rounded-3xl">
-                  <p className="text-gray-600 font-black uppercase italic tracking-widest">No hay productos en esta línea</p>
+                  <p className="text-gray-600 font-black uppercase italic tracking-widest">No hay productos disponibles en la línea {lineaActiva.toLowerCase()}</p>
                 </div>
               )}
             </div>
           </motion.div>
         </AnimatePresence>
-
       </div>
     </div>
   );
