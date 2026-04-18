@@ -4,7 +4,7 @@ import { ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 // Importación de la nueva foto de portada
-import imgPortada from '../assets/Foto portada.png'; 
+import imgPortada from '../assets/Fondo portada.png'; 
 
 const Home = () => {
   return (
