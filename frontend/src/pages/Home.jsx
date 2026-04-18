@@ -43,7 +43,7 @@ const Home = () => {
               </span>
             </h1>
             <p className="text-gray-400 text-lg md:text-xl mb-10 max-w-lg leading-relaxed">
-              Elevando el estándar del rendimiento deportivo. Nutrición técnica diseñada específicamente para la exigencia del Polo de alta competencia.
+              Elevando el estándar del rendimiento deportivo. Nutrición técnica diseñada específicamente para la exigencia de alta competencia.
             </p>
             
             <div className="flex gap-4">
