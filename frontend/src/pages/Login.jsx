@@ -2,7 +2,7 @@ import React, { useState, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Lock } from 'lucide-react';
+import { Lock, Mail, Key } from 'lucide-react';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -12,11 +12,20 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      await login(email, password);
-      navigate('/logistica');
-    } catch (error) {
-      alert("Error en las credenciales. Acceso denegado.");
+    
+    // Credenciales acordadas
+    const ADMIN_EMAIL = "nutritionavangard@gmail.com";
+    const ADMIN_PASS = "Avangardnutrition2000!";
+
+    if (email === ADMIN_EMAIL && password === ADMIN_PASS) {
+      try {
+        await login(email, password);
+        navigate('/logistica');
+      } catch (error) {
+        alert("Error en el sistema de autenticación.");
+      }
+    } else {
+      alert("Credenciales incorrectas. Acceso denegado.");
     }
   };
 
@@ -38,29 +47,41 @@ const Login = () => {
           <h2 className="text-3xl font-black text-white mb-1 uppercase tracking-tighter">Acceso <span className="text-[#D4AF37]">Admin</span></h2>
           <p className="text-gray-500 text-[10px] uppercase tracking-[0.3em] font-bold mb-8">Panel de Logística Avangard</p>
           
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-[10px] uppercase font-bold text-gray-600 mb-2 ml-1">Email Corporativo</label>
-              <input 
-                type="email" 
-                required
-                className="w-full p-4 rounded-lg text-white"
-                placeholder="admin@avangard.com"
-                onChange={(e) => setEmail(e.target.value)}
-              />
+              <label className="block text-[10px] uppercase font-bold text-gray-600 mb-2 ml-1 tracking-widest">Email Corporativo</label>
+              <div className="relative">
+                <Mail className="absolute left-4 top-4 text-gray-700" size={18} />
+                <input 
+                  type="email" 
+                  required
+                  value={email}
+                  className="w-full bg-black border border-gray-800 p-4 pl-12 rounded-lg text-white focus:border-[#D4AF37] outline-none transition-all placeholder:text-gray-800"
+                  placeholder="admin@avangard.com"
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
             </div>
+
             <div>
-              <label className="block text-[10px] uppercase font-bold text-gray-600 mb-2 ml-1">Contraseña</label>
-              <input 
-                type="password" 
-                required
-                className="w-full p-4 rounded-lg text-white"
-                placeholder="••••••••"
-                onChange={(e) => setPassword(e.target.value)}
-              />
+              <label className="block text-[10px] uppercase font-bold text-gray-600 mb-2 ml-1 tracking-widest">Contraseña</label>
+              <div className="relative">
+                <Key className="absolute left-4 top-4 text-gray-700" size={18} />
+                <input 
+                  type="password" 
+                  required
+                  value={password}
+                  className="w-full bg-black border border-gray-800 p-4 pl-12 rounded-lg text-white focus:border-[#D4AF37] outline-none transition-all placeholder:text-gray-800"
+                  placeholder="••••••••"
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
             </div>
             
-            <button className="w-full bg-white text-black font-black py-4 rounded-lg uppercase tracking-widest hover:bg-[#D4AF37] transition-all mt-6">
+            <button 
+              type="submit"
+              className="w-full bg-white text-black font-black py-4 rounded-lg uppercase tracking-widest hover:bg-[#D4AF37] hover:text-white transition-all mt-6 shadow-lg shadow-black"
+            >
               Iniciar Sesión
             </button>
           </form>
