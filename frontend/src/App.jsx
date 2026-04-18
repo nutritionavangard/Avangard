@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 
@@ -16,11 +16,19 @@ import Login from './pages/Login';
 function App() {
   const location = useLocation();
 
+  // Sistema de Keep-Alive para evitar que Render se duerma (Plan Free)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetch('/').then(() => console.log('Ping de actividad enviado.'));
+    }, 600000); // Se ejecuta cada 10 minutos
+    
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div className="min-h-screen bg-[#050505]">
       <Navbar />
       
-      {/* AnimatePresence permite que las transiciones de salida funcionen */}
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
           <Route 
