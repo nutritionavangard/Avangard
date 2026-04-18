@@ -12,6 +12,7 @@ import imgYeguas from '../assets/Premium BAL Yeguas.png';
 
 // Importación de imágenes - Línea Professional
 import imgMantenimiento from '../assets/Professional BAL Mantenimiento.png';
+import imgDeporte from '../assets/Professional BAL Deporte.png';
 
 const productosData = {
   "polo": { 
@@ -150,7 +151,7 @@ const productosData = {
     name: "BAL. MANTENIMIENTO", 
     price: "$72.000", 
     img: imgMantenimiento, 
-    color: "#D4AF37", 
+    color: "#2563eb", 
     tagline: "EQUILIBRIO DIARIO",
     desc: "Este producto pertenece a la línea Professional. Alimento balanceado elaborado con materias primas de excelente calidad. Provee niveles de energía, proteínas, minerales y vitaminas para cubrir los requerimientos de mantenimiento del caballo adulto.",
     recomendacion: "Se recomienda utilizar a un nivel del 0,5 al 1% del peso vivo, repartido en dos comidas después del suministro de heno.",
@@ -181,9 +182,9 @@ const productosData = {
   },
   "deporte": { 
     name: "BAL. DEPORTE", 
-    price: "$78.000", // Precio estimado, ajustar si es necesario
+    price: "$78.000", 
     img: imgDeporte, 
-    color: "#D4AF37", 
+    color: "#2563eb", 
     tagline: "RENDIMIENTO CONSTANTE",
     desc: "Este producto pertenece a la línea Professional. Alimento balanceado elaborado con materias primas de excelente calidad. Provee niveles de energía, proteínas, minerales y vitaminas necesarios para cubrir los requerimientos de caballos en entrenamiento y competencia.",
     recomendacion: "Se recomienda utilizar a un nivel del 0,5 al 1,2% del peso vivo, repartido en dos o tres comidas diarias, siempre después del suministro de heno.",
@@ -197,7 +198,6 @@ const productosData = {
       { label: "Cobalto", value: "0,2 mg" }, { label: "Selenio", value: "0,2 mg" },
       { label: "Beta caroteno", value: "12,1 mg" }, { label: "Vitamina A", value: "6.800 UI" },
       { label: "Vitamina D3", value: "1.360 UI" }, { label: "Vitamina E", value: "270 UI" },
-      // Vitaminas Hidrosolubles (Aporte en mg/kg)
       { label: "Biotina", value: "3,3 mg" }, { label: "Colina", value: "1.154,0 mg" },
       { label: "Ác. Fólico", value: "1,8 mg" }, { label: "Niacina", value: "81,3 mg" },
       { label: "Ác. Pantoténico", value: "27,0 mg" }, { label: "Riboflavina", value: "7,8 mg" },
@@ -233,19 +233,24 @@ const DetalleProducto = () => {
           </motion.div>
 
           <motion.div initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }}>
-            <h2 className="text-[#D4AF37] font-bold tracking-[0.4em] uppercase text-xs mb-3">{prod.tagline}</h2>
+            <h2 style={{ color: prod.color }} className="font-bold tracking-[0.4em] uppercase text-xs mb-3">{prod.tagline}</h2>
             <h1 className="text-7xl font-black uppercase mb-6 tracking-tighter leading-[0.9]">
               {prod.name.split('. ')[0]}<br/>
-              <span className="text-[#D4AF37]">{prod.name.split('. ')[1] || ""}</span>
+              <span style={{ color: prod.color }}>{prod.name.split('. ')[1] || ""}</span>
             </h1>
             <p className="text-gray-400 text-xl leading-relaxed mb-6 font-light">{prod.desc}</p>
-            <div className="bg-gray-900/30 border-l-2 border-[#D4AF37] p-4 mb-8">
-              <p className="text-[#D4AF37] text-sm italic">{prod.recomendacion}</p>
+            <div className="bg-gray-900/30 border-l-2 p-4 mb-8" style={{ borderColor: prod.color }}>
+              <p style={{ color: prod.color }} className="text-sm italic">{prod.recomendacion}</p>
             </div>
 
             <div className="flex items-center justify-between border-t border-gray-900 pt-8">
               <span className="text-5xl font-light italic">{prod.price}</span>
-              <button className="bg-white text-black px-10 py-5 font-black uppercase text-xs tracking-widest hover:bg-[#D4AF37] hover:text-white transition-all duration-500">
+              <button 
+                className="bg-white text-black px-10 py-5 font-black uppercase text-xs tracking-widest transition-all duration-500 hover:text-white"
+                style={{ '--hover-bg': prod.color }}
+                onMouseEnter={(e) => e.target.style.backgroundColor = prod.color}
+                onMouseLeave={(e) => e.target.style.backgroundColor = 'white'}
+              >
                 Consultar Stock
               </button>
             </div>
@@ -255,7 +260,7 @@ const DetalleProducto = () => {
         <div className="grid md:grid-cols-3 gap-12 border-t border-gray-900 pt-16">
           <div>
             <h3 className="text-white font-bold uppercase tracking-widest text-sm mb-8 flex items-center gap-3">
-              <span className="w-8 h-[1px] bg-[#D4AF37]"></span> Aportes Nutricionales
+              <span className="w-8 h-[1px]" style={{ backgroundColor: prod.color }}></span> Aportes Nutricionales
             </h3>
             <div className="space-y-3">
               {prod.nutricion?.map((item, i) => (
@@ -269,7 +274,7 @@ const DetalleProducto = () => {
 
           <div>
             <h3 className="text-white font-bold uppercase tracking-widest text-sm mb-8 flex items-center gap-3">
-              <span className="w-8 h-[1px] bg-[#D4AF37]"></span> Aminoácidos (%)
+              <span className="w-8 h-[1px]" style={{ backgroundColor: prod.color }}></span> Aminoácidos (%)
             </h3>
             <div className="space-y-3">
               {prod.aminoacidos?.map((item, i) => (
@@ -283,7 +288,7 @@ const DetalleProducto = () => {
 
           <div>
             <h3 className="text-white font-bold uppercase tracking-widest text-sm mb-8 flex items-center gap-3">
-              <span className="w-8 h-[1px] bg-[#D4AF37]"></span> Composición
+              <span className="w-8 h-[1px]" style={{ backgroundColor: prod.color }}></span> Composición
             </h3>
             <p className="text-gray-500 text-sm leading-relaxed mb-6 uppercase tracking-wider">{prod.ingredientes}</p>
           </div>
