@@ -1,0 +1,17 @@
+Nutritionavangard@gmail.com
+Avangardnutrition2000!
+
+nutritionavangard_db_user
+3JPRljOdZqKVxMYO
+
+mongodb+srv://nutritionavangard_db_user:3JPRljOdZqKVxMYO@avangard.kwkreva.mongodb.net/?appName=Avangard
+
+.\up
+
+
+Recorda que :
+-modifica los códigos pero no toques nada que ya este funcionando.
+-Pasame los códigos completos y 100% funcional siempre.
+-Agregale a los códigos lo que te pido solamente.
+-No te olvides nunca el orden.
+-No inventes nada que no este acordado.

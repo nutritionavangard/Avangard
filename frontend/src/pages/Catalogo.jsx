@@ -31,27 +31,31 @@ const Catalogo = () => {
   useEffect(() => {
     const fetchProductos = async () => {
       try {
-        const response = await fetch('/api/products');
-        if (!response.ok) throw new Error('Error en la red');
+        // Usamos la URL completa para asegurar conexión si el proxy falla
+        const response = await fetch('http://localhost:5000/api/products');
+        
+        const contentType = response.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+          throw new TypeError("El servidor no devolvió JSON. Revisa el Backend.");
+        }
+
         const data = await response.json();
         
         const productosConImagen = data.map(p => {
-          // Normalizamos el nombre para el mapa de imágenes
-          const nameLower = p.name.toLowerCase();
+          const nameLower = (p.name || "").toLowerCase();
           const key = Object.keys(imageMap).find(k => nameLower.includes(k)) || "polo";
 
           return {
             ...p,
             displayImage: imageMap[key],
-            // Normalizamos el color basándonos en la línea (ignorando mayúsculas)
-            color: p.line.toLowerCase() === 'premium' ? "#D4AF37" : "#2563eb"
+            color: (p.line || "").toLowerCase() === 'premium' ? "#D4AF37" : "#2563eb"
           };
         });
 
         setProductos(productosConImagen);
         setLoading(false);
       } catch (error) {
-        console.error("Error cargando productos:", error);
+        console.error("Error detallado:", error);
         setLoading(false);
       }
     };
@@ -64,9 +68,8 @@ const Catalogo = () => {
     { id: 'PROFESSIONAL', label: 'Línea Professional', color: '#2563eb' }
   ];
 
-  // CORRECCIÓN CLAVE: Normalizamos ambos lados de la comparación a minúsculas
   const productosFiltrados = productos.filter(p => 
-    p.line && p.line.toLowerCase() === lineaActiva.toLowerCase()
+    p.line && p.line.toUpperCase() === lineaActiva
   );
 
   if (loading) return <div className="bg-[#050505] min-h-screen pt-40 text-center font-black uppercase text-[#D4AF37]">Cargando Catálogo...</div>;
@@ -127,7 +130,9 @@ const Catalogo = () => {
                 ))
               ) : (
                 <div className="py-20 text-center col-span-2 border border-dashed border-gray-900 rounded-3xl">
-                  <p className="text-gray-600 font-black uppercase italic tracking-widest">No hay productos disponibles en la línea {lineaActiva.toLowerCase()}</p>
+                  <p className="text-gray-600 font-black uppercase italic tracking-widest">
+                    No hay productos disponibles en la línea {lineaActiva.toLowerCase()}
+                  </p>
                 </div>
               )}
             </div>

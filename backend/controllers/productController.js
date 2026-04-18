@@ -5,7 +5,7 @@ const Stock = require('../models/Stock');
 // @route   GET /api/products
 exports.getProducts = async (req, res) => {
     try {
-        // Ordena por línea (Premium primero) para mantener la jerarquía del catálogo
+        // Mantenemos el orden por línea para la jerarquía del catálogo
         const products = await Product.find().sort({ line: -1 }); 
         res.json(products);
     } catch (error) {
@@ -17,24 +17,25 @@ exports.getProducts = async (req, res) => {
 // @route   POST /api/products
 exports.createProduct = async (req, res) => {
     try {
-        const { name, desc, line, price, image, qty, color } = req.body;
+        // Desestructuramos ambos campos (desc y description) para evitar fallos de carga
+        const { name, desc, description, line, price, image, qty, color } = req.body;
 
         // 1. Crear el producto
-        // Se usa 'desc' para mantener consistencia con el componente ProductCard
+        // Usamos (desc || description) para que funcione sin importar cómo envíes el dato
         const product = new Product({ 
             name, 
-            desc, 
+            desc: desc || description, 
             line, 
             price, 
             image,
-            color, // Almacenamos el color para la UI (ej: #D4AF37)
+            color, 
             qty: qty || 0 
         });
 
         const createdProduct = await product.save();
 
         // 2. Crear automáticamente la entrada en el depósito (Stock)
-        // Se vincula al depósito de San Miguel
+        // Vinculado al depósito de San Miguel
         const initialStock = new Stock({
             product: createdProduct._id,
             productName: createdProduct.name,
