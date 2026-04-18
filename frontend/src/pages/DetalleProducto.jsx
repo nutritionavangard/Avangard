@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
@@ -17,7 +17,6 @@ import imgDeporte from '../assets/Professional BAL Deporte.png';
 const productosData = {
   "polo": { 
     name: "BAL. POLO", 
-    price: "$85.000", 
     img: imgPolo, 
     color: "#D4AF37", 
     tagline: "ENERGÍA EXPLOSIVA",
@@ -48,9 +47,40 @@ const productosData = {
     ],
     ingredientes: "maíz, avena, cebada, pellet de soja, poroto de soja desactivado, afrechillo de trigo, harina de alfalfa, carbonato de calcio, fosfato mono-bicálcico, cloruro de sodio, óxido de magnesio, microminerales, vitaminas, aminoácidos, antioxidantes, levaduras, secuestrante de micotoxinas y saborizantes."
   },
+  "equitacion": { 
+    name: "BAL. EQUITACION", 
+    img: imgEquitacion, 
+    color: "#D4AF37", 
+    tagline: "CONCENTRACIÓN Y POTENCIA",
+    desc: "Este alimento balanceado está elaborado con materias primas de primera calidad. Provee niveles de energía balanceados a partir de fibra degradable, almidón y lípidos; y cantidades de proteína de muy alto valor biológico para un adecuado funcionamiento de las masas musculares. Proporciona minerales y vitaminas necesarios para un excelente rendimiento deportivo.",
+    recomendacion: "Se recomienda utilizar a un nivel del 0,5 al 1% del peso vivo, repartido en dos comidas después del consumo de heno.",
+    nutricion: [
+      { label: "Proteína", value: "13 %" }, { label: "Energía Digestible", value: "2.900 Kcal" },
+      { label: "Humedad", value: "10 %" }, { label: "Calcio", value: "0,70 %" },
+      { label: "Fósforo", value: "0,60 %" }, { label: "Sodio", value: "0,30 %" },
+      { label: "Magnesio", value: "0,20 %" }, { label: "Hierro", value: "80 mg" },
+      { label: "Cobre", value: "12 mg" }, { label: "Zinc", value: "50 mg" },
+      { label: "Manganeso", value: "45 mg" }, { label: "Iodo", value: "0,8 mg" },
+      { label: "Cobalto", value: "0,2 mg" }, { label: "Selenio", value: "0,2 mg" },
+      { label: "Beta caroteno", value: "12,8 mg" }, { label: "Vitamina A", value: "7.200 UI" },
+      { label: "Vitamina D3", value: "1.400 UI" }, { label: "Vitamina E", value: "285 UI" },
+      { label: "Biotina", value: "3,3 mg" }, { label: "Colina", value: "1.183,0 mg" },
+      { label: "Ác. Fólico", value: "1,8 mg" }, { label: "Niacina", value: "81,4 mg" },
+      { label: "Ác. Pantoténico", value: "27,1 mg" }, { label: "Riboflavina", value: "7,8 mg" },
+      { label: "Tiamina", value: "7,4 mg" }, { label: "Vitamina B6", value: "9,0 mg" },
+      { label: "Vitamina B12", value: "322,0 mg" }, { label: "Vitamina C", value: "140,0 mg" }
+    ],
+    aminoacidos: [
+      { label: "Arginina", value: "0,94" }, { label: "Histidina", value: "0,38" },
+      { label: "Isoleucina", value: "0,56" }, { label: "Leucina", value: "1,13" },
+      { label: "Lisina", value: "0,71" }, { label: "Metionina", value: "0,24" },
+      { label: "Cistina", value: "0,31" }, { label: "Fenilalanina", value: "0,71" },
+      { label: "Tirosina", value: "0,48" }, { label: "Valina", value: "0,54" }
+    ],
+    ingredientes: "maíz, avena, cebada, pellet de soja, poroto de soja desactivado, afrechillo de trigo, harina de alfalfa, carbonato de calcio, fosfato mono-bicálcico, cloruro de sodio, óxido de magnesio, microminerales, vitaminas, aminoácidos, antioxidantes, levaduras, secuestrante de micotoxinas y saborizantes."
+  },
   "psc": { 
     name: "BAL. PSC", 
-    price: "$88.000", 
     img: imgPSC, 
     color: "#D4AF37", 
     tagline: "MAXIMIZA EL POTENCIAL",
@@ -83,7 +113,6 @@ const productosData = {
   },
   "yeguas": { 
     name: "BAL. YEGUAS", 
-    price: "$92.000", 
     img: imgYeguas, 
     color: "#D4AF37", 
     tagline: "NUTRICIÓN GESTACIONAL",
@@ -116,7 +145,6 @@ const productosData = {
   },
   "potrillos": { 
     name: "BAL. POTRILLOS", 
-    price: "$95.000", 
     img: imgPotrillos, 
     color: "#D4AF37", 
     tagline: "DESARROLLO ESQUELÉTICO",
@@ -149,7 +177,6 @@ const productosData = {
   },
   "mantenimiento": { 
     name: "BAL. MANTENIMIENTO", 
-    price: "$72.000", 
     img: imgMantenimiento, 
     color: "#2563eb", 
     tagline: "EQUILIBRIO DIARIO",
@@ -182,7 +209,6 @@ const productosData = {
   },
   "deporte": { 
     name: "BAL. DEPORTE", 
-    price: "$78.000", 
     img: imgDeporte, 
     color: "#2563eb", 
     tagline: "RENDIMIENTO CONSTANTE",
@@ -217,7 +243,33 @@ const productosData = {
 
 const DetalleProducto = () => {
   const { id } = useParams();
+  const [precioDinamico, setPrecioDinamico] = useState("Cargando...");
   const prod = productosData[id] || productosData["polo"];
+
+  useEffect(() => {
+    const fetchPrecio = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/products');
+        const data = await response.json();
+        
+        // Buscamos el producto en la lista de la API por nombre parcial
+        const productoEncontrado = data.find(p => 
+          p.name.toLowerCase().includes(id.toLowerCase())
+        );
+
+        if (productoEncontrado && productoEncontrado.price) {
+          setPrecioDinamico(`$${productoEncontrado.price.toLocaleString()}`);
+        } else {
+          setPrecioDinamico("Consultar");
+        }
+      } catch (error) {
+        console.error("Error cargando precio:", error);
+        setPrecioDinamico("Consultar");
+      }
+    };
+
+    fetchPrecio();
+  }, [id]);
 
   return (
     <div className="bg-[#050505] min-h-screen pt-32 pb-20 px-8 text-white">
@@ -244,7 +296,7 @@ const DetalleProducto = () => {
             </div>
 
             <div className="flex items-center justify-between border-t border-gray-900 pt-8">
-              <span className="text-5xl font-light italic">{prod.price}</span>
+              <span className="text-5xl font-light italic">{precioDinamico}</span>
               <button 
                 className="bg-white text-black px-10 py-5 font-black uppercase text-xs tracking-widest transition-all duration-500 hover:text-white"
                 style={{ '--hover-bg': prod.color }}
