@@ -3,19 +3,25 @@ import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
+// Importación de la nueva foto de portada
+import imgPortada from '../assets/Foto portada.png'; 
+
 const Home = () => {
   return (
     <div className="relative min-h-screen bg-[#050505] overflow-hidden">
       {/* SECCIÓN HERO / BANNER */}
       <div className="relative h-[90vh] flex items-center">
         
-        {/* IMAGEN DEL JUGADOR - Ajustá la ruta a donde guardes la foto */}
+        {/* IMAGEN DE PORTADA */}
         <div className="absolute right-0 top-0 w-full h-full md:w-2/3 z-0">
           <img 
-            src="/assets/jugador-polo-azul.png" 
-            alt="Avangard Player" 
+            src={imgPortada} 
+            alt="Avangard Equine Portada" 
             className="w-full h-full object-cover object-center opacity-60 md:opacity-90"
-            style={{ maskImage: 'linear-gradient(to left, black 60%, transparent 100%)' }}
+            style={{ 
+              maskImage: 'linear-gradient(to left, black 60%, transparent 100%)',
+              WebkitMaskImage: 'linear-gradient(to left, black 60%, transparent 100%)' 
+            }}
           />
         </div>
 
@@ -41,7 +47,7 @@ const Home = () => {
             </p>
             
             <div className="flex gap-4">
-              <Link to="/catalogo" className="bg-white text-black px-8 py-4 font-bold uppercase tracking-widest flex items-center gap-3 hover:bg-[#D4AF37] transition-all group">
+              <Link to="/catalogo" className="bg-white text-black px-8 py-4 font-bold uppercase tracking-widest flex items-center gap-3 hover:bg-[#D4AF37] hover:text-white transition-all group">
                 Ver Catálogo <ArrowRight className="group-hover:translate-x-2 transition-transform" />
               </Link>
             </div>
