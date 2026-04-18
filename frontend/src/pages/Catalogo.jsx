@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ProductCard from '../components/ProductCard';
 
@@ -14,72 +14,88 @@ import imgDeporte from '../assets/Professional BAL Deporte.png';
 
 const Catalogo = () => {
   const [lineaActiva, setLineaActiva] = useState('PREMIUM');
-  const [productos, setProductos] = useState([]);
-  const [loading, setLoading] = useState(true);
 
-  const imageMap = {
-    "polo": imgPolo,
-    "psc": imgPSC,
-    "yeguas": imgYeguas,
-    "potrillos": imgPotrillos,
-    "equitacion": imgEquitacion,
-    "vigor": imgVigor,
-    "mantenimiento": imgMantenimiento,
-    "deporte": imgDeporte
-  };
-
-  useEffect(() => {
-    const fetchProductos = async () => {
-      try {
-        // Se utiliza la ruta absoluta para asegurar conexión directa con el backend
-        const response = await fetch('http://localhost:5000/api/products');
-        
-        const contentType = response.headers.get("content-type");
-        if (!contentType || !contentType.includes("application/json")) {
-          throw new TypeError("El servidor no devolvió JSON. Revisa el Backend.");
-        }
-
-        const data = await response.json();
-        
-        const productosConImagen = data.map(p => {
-          const nameLower = (p.name || "").toLowerCase();
-          const key = Object.keys(imageMap).find(k => nameLower.includes(k)) || "polo";
-
-          return {
-            ...p,
-            displayImage: imageMap[key],
-            // Normalización para asignar color según la línea desde la DB
-            color: (p.line || "").toLowerCase() === 'premium' ? "#D4AF37" : "#2563eb"
-          };
-        });
-
-        setProductos(productosConImagen);
-        setLoading(false);
-      } catch (error) {
-        console.error("Error detallado en la carga:", error);
-        setLoading(false);
-      }
-    };
-
-    fetchProductos();
-  }, []);
+  // Datos estáticos de los productos
+  const productosEstaticos = [
+    {
+      _id: '1',
+      name: 'BAL POLO',
+      line: 'PREMIUM',
+      desc: 'Energía de alta intensidad para caballos de polo en competencia.',
+      image: imgPolo,
+      color: '#D4AF37'
+    },
+    {
+      _id: '2',
+      name: 'BAL PSC',
+      line: 'PREMIUM',
+      desc: 'Optimizado para Pura Sangre de Carrera, máximo rendimiento en pista.',
+      image: imgPSC,
+      color: '#D4AF37'
+    },
+    {
+      _id: '3',
+      name: 'BAL YEGUAS',
+      line: 'PREMIUM',
+      desc: 'Nutrición balanceada para yeguas en gestación y lactancia.',
+      image: imgYeguas,
+      color: '#D4AF37'
+    },
+    {
+      _id: '4',
+      name: 'BAL POTRILLOS',
+      line: 'PREMIUM',
+      desc: 'Crecimiento óseo y muscular armonioso para el futuro campeón.',
+      image: imgPotrillos,
+      color: '#D4AF37'
+    },
+    {
+      _id: '5',
+      name: 'BAL EQUITACION',
+      line: 'PREMIUM',
+      desc: 'Concentración y potencia controlada para salto y adiestramiento.',
+      image: imgEquitacion,
+      color: '#D4AF37'
+    },
+    {
+      _id: '6',
+      name: 'BAL VIGOR',
+      line: 'PREMIUM',
+      desc: 'Suplemento energético para caballos con alta demanda física.',
+      image: imgVigor,
+      color: '#D4AF37'
+    },
+    {
+      _id: '7',
+      name: 'BAL MANTENIMIENTO',
+      line: 'PROFESSIONAL',
+      desc: 'Dieta equilibrada para caballos en actividad moderada.',
+      image: imgMantenimiento,
+      color: '#2563eb'
+    },
+    {
+      _id: '8',
+      name: 'BAL DEPORTE',
+      line: 'PROFESSIONAL',
+      desc: 'Proteína y energía para el entrenamiento diario profesional.',
+      image: imgDeporte,
+      color: '#2563eb'
+    }
+  ];
 
   const botones = [
     { id: 'PREMIUM', label: 'Línea Premium', color: '#D4AF37' },
     { id: 'PROFESSIONAL', label: 'Línea Professional', color: '#2563eb' }
   ];
 
-  // FILTRADO ROBUSTO: Se asegura de que p.line exista y coincida ignorando mayúsculas/minúsculas
-  const productosFiltrados = productos.filter(p => 
-    p.line && p.line.toUpperCase() === lineaActiva.toUpperCase()
-  );
-
-  if (loading) return <div className="bg-[#050505] min-h-screen pt-40 text-center font-black uppercase text-[#D4AF37]">Cargando Catálogo...</div>;
+  // Filtrado de la lista estática
+  const productosFiltrados = productosEstaticos.filter(p => p.line === lineaActiva);
 
   return (
     <div className="bg-[#050505] min-h-screen pt-32 pb-20 px-8">
       <div className="max-w-7xl mx-auto">
         
+        {/* Selectores de Línea */}
         <div className="flex flex-wrap gap-4 mb-16 justify-center md:justify-start">
           {botones.map((btn) => (
             <button
@@ -108,6 +124,7 @@ const Catalogo = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
           >
+            {/* Encabezados */}
             <div className="mb-12">
               <h2 className="font-bold tracking-[0.4em] uppercase text-xs mb-4" style={{ color: lineaActiva === 'PREMIUM' ? '#D4AF37' : '#2563eb' }}>
                 {lineaActiva === 'PREMIUM' ? 'Nutrición de Campeones' : 'Rendimiento Profesional'}
@@ -119,24 +136,14 @@ const Catalogo = () => {
               </h1>
             </div>
 
+            {/* Grid de Productos */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
-              {productosFiltrados.length > 0 ? (
-                productosFiltrados.map((producto) => (
-                  <ProductCard 
-                    key={producto._id} 
-                    product={{
-                      ...producto,
-                      image: producto.displayImage
-                    }} 
-                  />
-                ))
-              ) : (
-                <div className="py-20 text-center col-span-2 border border-dashed border-gray-900 rounded-3xl">
-                  <p className="text-gray-600 font-black uppercase italic tracking-widest">
-                    No hay productos disponibles en la línea {lineaActiva.toLowerCase()}
-                  </p>
-                </div>
-              )}
+              {productosFiltrados.map((producto) => (
+                <ProductCard 
+                  key={producto._id} 
+                  product={producto} 
+                />
+              ))}
             </div>
           </motion.div>
         </AnimatePresence>
