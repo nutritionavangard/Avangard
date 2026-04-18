@@ -2,7 +2,7 @@ import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
-// IMPORTANTE: Verifica que estos nombres coincidan EXACTAMENTE con tus archivos en /assets
+// Importación de imágenes con nombres exactos de assets
 import imgEquitacion from '../assets/Premium BAL Equitacion.png';
 import imgPolo from '../assets/Premium BAL POLO.png';
 import imgPotrillos from '../assets/Premium BAL Potrillos.png';
@@ -20,35 +20,87 @@ const productosData = {
     desc: "Este alimento balanceado está elaborado con materias primas de primera calidad. Provee niveles de energía balanceados a partir de fibra degradable, almidón y lípidos; y cantidades de proteína de muy alto valor biológico para un adecuado funcionamiento de las masas musculares.",
     recomendacion: "Se recomienda utilizar a un nivel del 0,5 al 1% del peso vivo, repartido en dos comidas después del consumo de heno.",
     nutricion: [
-      { label: "Proteína", value: "13 %" },
-      { label: "Energía Digestible", value: "2.900 Kcal" },
-      { label: "Humedad", value: "10 %" },
-      { label: "Calcio", value: "0,70 %" },
-      { label: "Fósforo", value: "0,60 %" },
-      { label: "Magnesio", value: "0,20 %" },
-      { label: "Hierro", value: "80 mg" },
-      { label: "Zinc", value: "50 mg" },
-      { label: "Vitamina A", value: "7.200 UI" },
-      { label: "Vitamina E", value: "285 UI" }
+      { label: "Proteína", value: "13 %" }, { label: "Energía Digestible", value: "2.900 Kcal" },
+      { label: "Humedad", value: "10 %" }, { label: "Calcio", value: "0,70 %" },
+      { label: "Fósforo", value: "0,60 %" }, { label: "Sodio", value: "0,30 %" },
+      { label: "Magnesio", value: "0,20 %" }, { label: "Hierro", value: "80 mg" },
+      { label: "Vitamina A", value: "7.200 UI" }, { label: "Vitamina E", value: "285 UI" }
     ],
     aminoacidos: [
-      { label: "Lisina", value: "0,71" },
-      { label: "Metionina", value: "0,24" },
-      { label: "Treonina", value: "0,48" },
-      { label: "Arginina", value: "0,94" }
+      { label: "Arginina", value: "0,94" }, { label: "Isoleucina", value: "0,56" },
+      { label: "Leucina", value: "1,13" }, { label: "Lisina", value: "0,71" }
     ],
-    ingredientes: "maíz, avena, cebada, pellet de soja, poroto de soja desactivado, afrechillo de trigo, harina de alfalfa, carbonato de calcio, fosfato mono-bicálcico, cloruro de sodio, óxido de magnesio, microminerales, vitaminas, aminoácidos, antioxidantes, levaduras."
+    ingredientes: "maíz, avena, cebada, pellet de soja, poroto de soja desactivado, afrechillo de trigo, harina de alfalfa, carbonato de calcio, fosfato mono-bicálcico, cloruro de sodio, óxido de magnesio, microminerales, vitaminas, aminoácidos, antioxidantes, levaduras, secuestrante de micotoxinas y saborizantes."
   },
-  // Repetir estructura para psc, yeguas, potrillos, equitacion, vigor...
+  "psc": { 
+    name: "BAL. PSC", 
+    price: "$88.000", 
+    img: imgPSC, 
+    color: "#D4AF37", 
+    tagline: "MAXIMIZA EL POTENCIAL",
+    desc: "Provee niveles de energía balanceados a partir de fibra degradable, almidón y lípidos; y cantidades de proteína de muy alto valor biológico para un adecuado funcionamiento de las masas musculares.",
+    recomendacion: "Se recomienda utilizar a un nivel del 0,5% (mantenimiento), del 1 a 1,5% (competición) del peso vivo, repartido en dos o tres comidas después del consumo de heno.",
+    nutricion: [
+      { label: "Proteína", value: "13 %" }, { label: "Energía Digestible", value: "2.900 Kcal" },
+      { label: "Humedad", value: "10 %" }, { label: "Calcio", value: "0,70 %" },
+      { label: "Fósforo", value: "0,60 %" }, { label: "Sodio", value: "0,40 %" },
+      { label: "Magnesio", value: "0,15 %" }, { label: "Hierro", value: "80 mg" },
+      { label: "Vitamina A", value: "7.200 UI" }, { label: "Vitamina E", value: "285 UI" }
+    ],
+    aminoacidos: [
+      { label: "Arginina", value: "0,94" }, { label: "Histidina", value: "0,38" },
+      { label: "Isoleucina", value: "0,56" }, { label: "Lisina", value: "0,71" }
+    ],
+    ingredientes: "maíz, avena, cebada, pellet de soja, poroto de soja desactivado, afrechillo de trigo, harina de alfalfa, carbonato de calcio, fosfato mono-bicálcico, cloruro de sodio, óxido de magnesio, microminerales, vitaminas, lisina, levaduras, secuestrante de micotoxinas y saborizantes."
+  },
+  "yeguas": { 
+    name: "BAL. YEGUAS", 
+    price: "$92.000", 
+    img: imgYeguas, 
+    color: "#D4AF37", 
+    tagline: "NUTRICIÓN GESTACIONAL",
+    desc: "Aporta niveles de energía, proteínas, minerales, aminoácidos y vitaminas para cubrir los requerimientos de las yeguas durante la gestación y la lactancia.",
+    recomendacion: "Se recomienda utilizar a un nivel del 0,5 al 1% del peso vivo, repartido en dos comidas después de la ración de heno.",
+    nutricion: [
+      { label: "Proteína", value: "14,50 %" }, { label: "Energía Digestible", value: "2.900 Kcal" },
+      { label: "Humedad", value: "10 %" }, { label: "Calcio", value: "0,75 %" },
+      { label: "Fósforo", value: "0,65 %" }, { label: "Sodio", value: "0,10 %" },
+      { label: "Magnesio", value: "0,15 %" }, { label: "Hierro", value: "100 mg" },
+      { label: "Vitamina A", value: "3.300 UI" }, { label: "Vitamina E", value: "80 UI" }
+    ],
+    aminoacidos: [
+      { label: "Arginina", value: "1,07" }, { label: "Histidina", value: "0,43" },
+      { label: "Leucina", value: "1,24" }, { label: "Lisina", value: "0,76" }
+    ],
+    ingredientes: "maíz, avena, cebada, pellet de soja, poroto de soja desactivado, afrechillo de trigo, harina de alfalfa, Macro y Microminerales de alta biodisponibilidad, vitaminas, levaduras, secuestrante de micotoxinas, antioxidantes y saborizantes."
+  },
+  "potrillos": { 
+    name: "BAL. POTRILLOS", 
+    price: "$95.000", 
+    img: imgPotrillos, 
+    color: "#D4AF37", 
+    tagline: "DESARROLLO ESQUELÉTICO",
+    desc: "Provee niveles de energía equilibrados y proteína de muy alto valor biológico, asegurando el desarrollo esquelético y muscular del potrillo para alta competencia.",
+    recomendacion: "Se recomienda utilizar a un nivel del 0,5 al 1% del peso vivo, repartido en dos comidas después del suministro de heno.",
+    nutricion: [
+      { label: "Proteína", value: "17 %" }, { label: "Energía Digestible", value: "2.800 Kcal" },
+      { label: "Humedad", value: "10 %" }, { label: "Calcio", value: "0,72 %" },
+      { label: "Fósforo", value: "0,63 %" }, { label: "Sodio", value: "0,10 %" },
+      { label: "Magnesio", value: "0,15 %" }, { label: "Hierro", value: "120 mg" },
+      { label: "Vitamina A", value: "3.500 UI" }, { label: "Vitamina E", value: "80 UI" }
+    ],
+    aminoacidos: [
+      { label: "Arginina", value: "1,19" }, { label: "Histidina", value: "0,47" },
+      { label: "Isoleucina", value: "0,71" }, { label: "Lisina", value: "0,95" }
+    ],
+    ingredientes: "maíz, avena, cebada, pellet de soja, poroto de soja desactivado, afrechillo de trigo, harina de alfalfa, carbonato de calcio, fosfato mono-bicálcico, cloruro de sodio, óxido de magnesio, microminerales, aminoácidos, vitaminas, antioxidantes, secuestrante de micotoxinas, levadura y saborizantes."
+  }
 };
 
 const DetalleProducto = () => {
   const { id } = useParams();
-  
-  // Buscamos el producto. Si no existe, usamos "polo" por defecto para evitar pantalla negra.
   const prod = productosData[id] || productosData["polo"];
 
-  // Si aún así algo falla, mostramos un error simple
   if (!prod) {
     return (
       <div className="bg-[#050505] min-h-screen flex items-center justify-center text-white">
@@ -91,7 +143,6 @@ const DetalleProducto = () => {
           </motion.div>
         </div>
 
-        {/* TABLAS TÉCNICAS */}
         <div className="grid md:grid-cols-3 gap-12 border-t border-gray-900 pt-16">
           <div>
             <h3 className="text-white font-bold uppercase tracking-widest text-sm mb-8 flex items-center gap-3">
