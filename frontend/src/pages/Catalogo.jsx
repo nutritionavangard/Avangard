@@ -31,7 +31,7 @@ const Catalogo = () => {
   useEffect(() => {
     const fetchProductos = async () => {
       try {
-        // Usamos la URL completa para asegurar conexión si el proxy falla
+        // Se utiliza la ruta absoluta para asegurar conexión directa con el backend
         const response = await fetch('http://localhost:5000/api/products');
         
         const contentType = response.headers.get("content-type");
@@ -48,6 +48,7 @@ const Catalogo = () => {
           return {
             ...p,
             displayImage: imageMap[key],
+            // Normalización para asignar color según la línea desde la DB
             color: (p.line || "").toLowerCase() === 'premium' ? "#D4AF37" : "#2563eb"
           };
         });
@@ -55,7 +56,7 @@ const Catalogo = () => {
         setProductos(productosConImagen);
         setLoading(false);
       } catch (error) {
-        console.error("Error detallado:", error);
+        console.error("Error detallado en la carga:", error);
         setLoading(false);
       }
     };
@@ -68,8 +69,9 @@ const Catalogo = () => {
     { id: 'PROFESSIONAL', label: 'Línea Professional', color: '#2563eb' }
   ];
 
+  // FILTRADO ROBUSTO: Se asegura de que p.line exista y coincida ignorando mayúsculas/minúsculas
   const productosFiltrados = productos.filter(p => 
-    p.line && p.line.toUpperCase() === lineaActiva
+    p.line && p.line.toUpperCase() === lineaActiva.toUpperCase()
   );
 
   if (loading) return <div className="bg-[#050505] min-h-screen pt-40 text-center font-black uppercase text-[#D4AF37]">Cargando Catálogo...</div>;
