@@ -40,7 +40,8 @@ const ProductCard = ({ product }) => {
           
           <div className="flex items-center justify-between mt-6">
             <div className="text-[#D4AF37] text-2xl font-light font-sans tracking-tight">
-              ${product.price.toLocaleString()}
+              {/* Se añade validación de precio para asegurar funcionamiento 100% */}
+              ${(product.price || 0).toLocaleString()}
             </div>
             
             <Link 

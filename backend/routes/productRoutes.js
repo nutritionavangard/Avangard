@@ -1,12 +1,16 @@
 const express = require('express');
 const router = express.Router();
-const { getProducts, createProduct } = require('../controllers/productController');
+const { getStockStatus, updateStock } = require('../controllers/stockController');
 const { protect } = require('../middleware/authMiddleware');
 
-// Público: Ver el catálogo
-router.get('/', getProducts);
+// @route   GET /api/stock
+// @desc    Obtener el estado actual de todos los productos en depósito
+// @access  Privado (Solo Admin)
+router.get('/', protect, getStockStatus);
 
-// Protegido: Solo vos podés cargar productos nuevos
-router.post('/', protect, createProduct);
+// @route   POST /api/stock/update
+// @desc    Registrar un Ingreso o Egreso (Entrega) de mercadería
+// @access  Privado (Solo Admin)
+router.post('/update', protect, updateStock);
 
 module.exports = router;
