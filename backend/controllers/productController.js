@@ -5,7 +5,8 @@ const Stock = require('../models/Stock');
 // @route   GET /api/products
 exports.getProducts = async (req, res) => {
     try {
-        const products = await Product.find().sort({ line: -1 }); // Ordena por línea (Premium primero)
+        // Ordena por línea (Premium primero) para mantener la jerarquía del catálogo
+        const products = await Product.find().sort({ line: -1 }); 
         res.json(products);
     } catch (error) {
         res.status(500).json({ message: 'Error al obtener el catálogo' });
@@ -16,26 +17,29 @@ exports.getProducts = async (req, res) => {
 // @route   POST /api/products
 exports.createProduct = async (req, res) => {
     try {
-        const { name, description, line, price, image, qty } = req.body;
+        const { name, desc, line, price, image, qty, color } = req.body;
 
         // 1. Crear el producto
+        // Se usa 'desc' para mantener consistencia con el componente ProductCard
         const product = new Product({ 
             name, 
-            description, 
+            desc, 
             line, 
             price, 
             image,
-            qty: qty || 0 // Si no mandas cantidad, empieza en 0
+            color, // Almacenamos el color para la UI (ej: #D4AF37)
+            qty: qty || 0 
         });
 
         const createdProduct = await product.save();
 
         // 2. Crear automáticamente la entrada en el depósito (Stock)
+        // Se vincula al depósito de San Miguel
         const initialStock = new Stock({
             product: createdProduct._id,
             productName: createdProduct.name,
             quantity: createdProduct.qty,
-            warehouse: 'San Miguel',
+            warehouse: 'San Miguel', 
             movements: [{
                 type: 'Ingreso',
                 amount: createdProduct.qty,
@@ -52,6 +56,10 @@ exports.createProduct = async (req, res) => {
         });
 
     } catch (error) {
-        res.status(400).json({ message: 'Error en la carga del producto y stock' });
+        console.error("Error en createProduct:", error);
+        res.status(400).json({ 
+            message: 'Error en la carga del producto y stock',
+            details: error.message 
+        });
     }
 };

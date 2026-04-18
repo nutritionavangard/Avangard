@@ -1,10 +1,11 @@
 const Stock = require('../models/Stock');
 const Product = require('../models/Product');
 
-// @desc    Ver estado actual del depósito
+// @desc    Ver estado actual del depósito (Con datos del producto vinculados)
 // @route   GET /api/stock
 exports.getStockStatus = async (req, res) => {
     try {
+        // Traemos el stock y populamos la info del producto (precio, línea, etc.)
         const stock = await Stock.find().populate('product');
         res.json(stock);
     } catch (error) {
@@ -18,7 +19,7 @@ exports.updateStock = async (req, res) => {
     const { productId, type, amount, note, operator, recipient } = req.body;
 
     try {
-        // Buscamos el stock y el producto para obtener el nombre
+        // 1. Buscamos el stock y el producto de forma simultánea
         let stock = await Stock.findOne({ product: productId });
         const productData = await Product.findById(productId);
 
@@ -26,43 +27,55 @@ exports.updateStock = async (req, res) => {
             return res.status(404).json({ message: 'Producto no encontrado en la base de datos' });
         }
 
+        // Si por alguna razón el producto existe pero no tiene registro de stock, lo creamos
         if (!stock) {
             stock = new Stock({ 
                 product: productId, 
-                productName: productData.name, // Guardamos el nombre del producto
+                productName: productData.name,
                 quantity: 0, 
+                warehouse: 'San Miguel', //
                 movements: [] 
             });
         }
 
-        // Lógica de cálculo (Ingreso o Egreso)
+        // 2. Lógica de cálculo (Ingreso o Egreso)
         const numericAmount = Number(amount);
-        if (type === 'Ingreso') {
+        if (type.toLowerCase() === 'ingreso') {
             stock.quantity += numericAmount;
-        } else if (type === 'Egreso') {
+        } else if (type.toLowerCase() === 'entrega' || type.toLowerCase() === 'egreso') {
             if (stock.quantity < numericAmount) {
                 return res.status(400).json({ message: 'Stock insuficiente para realizar la entrega' });
             }
             stock.quantity -= numericAmount;
         }
 
-        // Historial de auditoría detallado
+        // 3. Registro en historial de movimientos
         stock.movements.push({ 
             type, 
             amount: numericAmount, 
             note, 
-            operator,   // Quién registra (Admin)
-            recipient,  // Quién recibe o entrega la mercadería
+            operator: operator || 'Admin', 
+            recipient: recipient || 'Depósito Central',
             date: Date.now()
         });
         
-        await stock.save();
+        // 4. GUARDADO SINCRONIZADO: Actualizamos el 'qty' en el modelo Product
+        // Esto es vital para que el Catálogo vea el cambio instantáneamente
+        productData.qty = stock.quantity;
+        
+        await Promise.all([
+            stock.save(),
+            productData.save()
+        ]);
+
         res.status(200).json({
-            message: 'Movimiento registrado con éxito',
+            message: 'Movimiento registrado y catálogo actualizado',
             currentStock: stock.quantity,
-            lastMovement: stock.movements[stock.movements.length - 1]
+            product: productData.name
         });
+        
     } catch (error) {
-        res.status(400).json({ message: 'Error en la actualización de stock' });
+        console.error("Error en updateStock:", error);
+        res.status(400).json({ message: 'Error en la actualización de stock y sincronización' });
     }
 };
