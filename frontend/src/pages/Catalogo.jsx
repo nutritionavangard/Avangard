@@ -2,13 +2,17 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ProductCard from '../components/ProductCard';
 
-// Importación de las nuevas imágenes Premium
+// Importación de imágenes Premium
 import imgEquitacion from '../assets/Premium BAL Equitacion.png';
 import imgPolo from '../assets/Premium BAL POLO.png';
 import imgPotrillos from '../assets/Premium BAL Potrillos.png';
 import imgPSC from '../assets/Premium BAL PSC.png';
 import imgVigor from '../assets/Premium BAL Vigor.png';
 import imgYeguas from '../assets/Premium BAL Yeguas.png';
+
+// Importación de imágenes Professional
+import imgMantenimiento from '../assets/Professional BAL Mantenimiento.png';
+import imgDeporte from '../assets/Professional BAL Deporte.png';
 
 const productosPremium = [
   { id: "polo", name: "Bal. Polo", line: "PREMIUM ELITE", price: 85000, image: imgPolo, color: "#D4AF37", desc: "Energía explosiva y recuperación rápida. Diseñado para la alta exigencia del Polo profesional." },
@@ -17,6 +21,11 @@ const productosPremium = [
   { id: "potrillos", name: "Bal. Potrillos", line: "PREMIUM ELITE", price: 95000, image: imgPotrillos, color: "#D4AF37", desc: "Crecimiento vigoroso y armónico. Refuerza la estructura ósea y muscular en etapas críticas." },
   { id: "equitacion", name: "Bal. Equitación", line: "PREMIUM ELITE", price: 87000, image: imgEquitacion, color: "#D4AF37", desc: "Rendimiento y elegancia. Concentración y templanza para caballos de salto y adiestramiento." },
   { id: "vigor", name: "Conc. Prot. Vigor", line: "PREMIUM ELITE", price: 105000, image: imgVigor, color: "#D4AF37", desc: "Concentrado proteico de máxima pureza. Vigor equino para ejemplares de exposición y elite." }
+];
+
+const productosProfessional = [
+  { id: "mantenimiento", name: "Bal. Mantenimiento", line: "PROFESSIONAL LINE", price: 72000, image: imgMantenimiento, color: "#2563eb", desc: "Equilibrio nutricional diario para caballos adultos en mantenimiento. Salud y vitalidad constante." },
+  { id: "deporte", name: "Bal. Deporte", line: "PROFESSIONAL LINE", price: 78000, image: imgDeporte, color: "#2563eb", desc: "Rendimiento optimizado para el entrenamiento diario. Aporte energético equilibrado para la competencia." }
 ];
 
 const Catalogo = () => {
@@ -32,7 +41,7 @@ const Catalogo = () => {
     <div className="bg-[#050505] min-h-screen pt-32 pb-20 px-8">
       <div className="max-w-7xl mx-auto">
         
-        {/* NAVEGACIÓN DE LÍNEAS (LOS TRES BOTONES) */}
+        {/* NAVEGACIÓN DE LÍNEAS */}
         <div className="flex flex-wrap gap-4 mb-16 justify-center md:justify-start">
           {botones.map((btn) => (
             <button
@@ -55,7 +64,7 @@ const Catalogo = () => {
         </div>
 
         <AnimatePresence mode="wait">
-          {lineaActiva === 'PREMIUM' ? (
+          {lineaActiva === 'PREMIUM' && (
             <motion.div 
               key="premium"
               initial={{ opacity: 0, y: 20 }}
@@ -70,16 +79,41 @@ const Catalogo = () => {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
-                {productosPremium.map((producto, index) => (
+                {productosPremium.map((producto) => (
                   <ProductCard key={producto.id} product={producto} />
                 ))}
               </div>
             </motion.div>
-          ) : (
+          )}
+
+          {lineaActiva === 'PROFESSIONAL' && (
+            <motion.div 
+              key="professional"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+            >
+              <div className="mb-12">
+                <h2 className="text-[#2563eb] font-bold tracking-[0.4em] uppercase text-xs mb-4">Rendimiento Profesional</h2>
+                <h1 className="text-7xl font-black text-white uppercase tracking-tighter">
+                  Línea <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#2563eb] to-[#60a5fa]">Professional</span>
+                </h1>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
+                {productosProfessional.map((producto) => (
+                  <ProductCard key={producto.id} product={producto} />
+                ))}
+              </div>
+            </motion.div>
+          )}
+
+          {lineaActiva === 'PERFORMANCE' && (
             <motion.div 
               key="proximamente"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
               className="py-40 text-center border-2 border-dashed border-gray-900 rounded-3xl"
             >
               <h3 className="text-4xl font-black text-gray-800 uppercase italic">
