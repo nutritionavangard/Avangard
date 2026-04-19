@@ -1,58 +1,79 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PackagePlus, PackageMinus, History, X, User, ClipboardList, Save, Edit3, DollarSign } from 'lucide-react';
 
 const Logistica = () => {
-  // 1. Estado de Stock con Precios incluidos
-  const [stock, setStock] = useState([
-    { id: 1, name: 'BAL. POLO', qty: 120, line: 'Premium', color: '#D4AF37', price: 25500 },
-    { id: 2, name: 'BAL. PSC', qty: 85, line: 'Premium', color: '#D4AF37', price: 28200 },
-    { id: 3, name: 'BAL. YEGUAS', qty: 40, line: 'Premium', color: '#D4AF37', price: 21900 },
-    { id: 4, name: 'BAL. POTRILLOS', qty: 30, line: 'Premium', color: '#D4AF37', price: 32400 },
-    { id: 5, name: 'BAL. MANTENIMIENTO', qty: 200, line: 'Professional', color: '#2563eb', price: 17800 },
-    { id: 6, name: 'BAL. DEPORTE', qty: 150, line: 'Professional', color: '#2563eb', price: 20500 },
-  ]);
-
+  // 1. Estado de Stock conectado al Backend
+  const [stock, setStock] = useState([]);
   const [logs, setLogs] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalType, setModalType] = useState('ingreso'); // 'ingreso', 'entrega' o 'precio'
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [transaction, setTransaction] = useState({ qty: '', recipient: '', notes: '', newPrice: '' });
 
-  // Función unificada para procesar movimientos y precios
-  const handleAction = (e) => {
+  // Carga inicial de datos desde la DB
+  const fetchProductos = async () => {
+    try {
+      const res = await fetch('http://localhost:5000/api/products');
+      const data = await res.json();
+      setStock(data);
+    } catch (err) {
+      console.error("Error cargando inventario:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchProductos();
+  }, []);
+
+  // Función unificada para procesar movimientos y precios en la DB
+  const handleAction = async (e) => {
     e.preventDefault();
     
-    if (modalType === 'precio') {
-      // Actualizar Precio
-      setStock(stock.map(item => 
-        item.id === selectedProduct.id ? { ...item, price: parseFloat(transaction.newPrice) } : item
-      ));
-    } else {
-      // Actualizar Stock
-      const amount = parseInt(transaction.qty);
-      setStock(stock.map(item => {
-        if (item.id === selectedProduct.id) {
-          return { ...item, qty: modalType === 'ingreso' ? item.qty + amount : item.qty - amount };
-        }
-        return item;
-      }));
+    try {
+      let updatedData = {};
 
-      // Registrar en el Log
-      const newLog = {
-        id: Date.now(),
-        date: new Date().toLocaleString(),
-        product: selectedProduct.name,
-        type: modalType,
-        qty: amount,
-        recipient: transaction.recipient || 'Depósito Central',
-      };
-      setLogs([newLog, ...logs]);
+      if (modalType === 'precio') {
+        updatedData = { price: parseFloat(transaction.newPrice) };
+      } else {
+        const amount = parseInt(transaction.qty);
+        const newQty = modalType === 'ingreso' 
+          ? selectedProduct.qty + amount 
+          : selectedProduct.qty - amount;
+        
+        updatedData = { qty: newQty };
+
+        // Registrar en el Log local (puedes luego persistir esto en otra colección si deseas)
+        const newLog = {
+          id: Date.now(),
+          date: new Date().toLocaleString(),
+          product: selectedProduct.name,
+          type: modalType,
+          qty: amount,
+          recipient: transaction.recipient || 'Depósito Central',
+        };
+        setLogs([newLog, ...logs]);
+      }
+
+      // Petición al Backend para actualizar el producto
+      const response = await fetch(`http://localhost:5000/api/products/${selectedProduct._id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedData)
+      });
+
+      if (response.ok) {
+        // Refrescar la lista para ver los cambios reflejados
+        fetchProductos();
+        setIsModalOpen(false);
+        setTransaction({ qty: '', recipient: '', notes: '', newPrice: '' });
+      } else {
+        alert("Error al actualizar la base de datos");
+      }
+
+    } catch (err) {
+      console.error("Error en la operación:", err);
     }
-
-    // Cerrar y limpiar
-    setIsModalOpen(false);
-    setTransaction({ qty: '', recipient: '', notes: '', newPrice: '' });
   };
 
   return (
@@ -75,13 +96,13 @@ const Logistica = () => {
             </h2>
             {stock.map((item) => (
               <motion.div 
-                layoutId={`item-${item.id}`}
-                key={item.id} 
+                layoutId={`item-${item._id}`}
+                key={item._id} 
                 className="group bg-[#0f0f0f] border border-gray-900 p-6 rounded-xl flex justify-between items-center hover:border-gray-700 transition-all shadow-xl"
               >
                 <div className="flex flex-col gap-1">
                   <div className="flex items-center gap-3">
-                    <span className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color }}></span>
+                    <span className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color || (item.line === 'Premium' ? '#D4AF37' : '#2563eb') }}></span>
                     <h3 className="text-lg font-black uppercase italic">{item.name}</h3>
                     <button 
                       onClick={() => { setSelectedProduct(item); setModalType('precio'); setTransaction({...transaction, newPrice: item.price}); setIsModalOpen(true); }}
@@ -91,7 +112,7 @@ const Logistica = () => {
                     </button>
                   </div>
                   <p className="text-[10px] text-gray-500 font-bold tracking-widest uppercase">
-                    Línea {item.line} | <span className="text-green-500 font-mono">${item.price.toLocaleString()}</span>
+                    Línea {item.line} | <span className="text-green-500 font-mono">${item.price?.toLocaleString()}</span>
                   </p>
                 </div>
 
