@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ProductCard from '../components/ProductCard';
 
-// Importación de imágenes (se mantienen como respaldo o para mapeo)
+// Importación de imágenes
 import imgEquitacion from '../assets/Premium BAL Equitacion.png';
 import imgPolo from '../assets/Premium BAL POLO.png';
 import imgPotrillos from '../assets/Premium BAL Potrillos.png';
@@ -16,8 +16,8 @@ const Catalogo = () => {
   const [lineaActiva, setLineaActiva] = useState('PREMIUM');
   const [productos, setProductos] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [errorServer, setErrorServer] = useState(false); // Estado para manejar si el servidor está caído
 
-  // Mapeo de imágenes para conectar el string de la DB con el asset importado
   const imageMap = {
     'BAL POLO': imgPolo,
     'BAL PSC': imgPSC,
@@ -29,23 +29,27 @@ const Catalogo = () => {
     'BAL DEPORTE': imgDeporte
   };
 
-  // Función para obtener productos del backend
   const fetchProductos = async () => {
     try {
       setLoading(true);
+      setErrorServer(false);
+      
+      // Asegurate de que esta URL sea la correcta según tu entorno (localhost o Render)
       const response = await fetch('http://localhost:5000/api/products');
+      
       if (!response.ok) throw new Error('Error al conectar con el servidor');
+      
       const data = await response.json();
       
-      // Asignamos la imagen local basándonos en el nombre si la DB no trae una URL completa
       const productosProcesados = data.map(p => ({
         ...p,
-        image: imageMap[p.name] || p.image // Prioriza el mapa local para mantener tu diseño
+        image: imageMap[p.name.toUpperCase()] || p.image // Normalizamos a mayúsculas para el match
       }));
 
       setProductos(productosProcesados);
     } catch (error) {
       console.error("Error en catálogo:", error);
+      setErrorServer(true); // Activamos aviso de servidor caído
     } finally {
       setLoading(false);
     }
@@ -60,9 +64,8 @@ const Catalogo = () => {
     { id: 'PROFESSIONAL', label: 'Línea Professional', color: '#2563eb' }
   ];
 
-  // Filtrado dinámico por la línea activa (normalizamos a mayúsculas para comparar)
   const productosFiltrados = productos.filter(p => 
-    p.line.toUpperCase() === lineaActiva.toUpperCase()
+    p.line && p.line.toUpperCase() === lineaActiva.toUpperCase()
   );
 
   return (
@@ -100,6 +103,15 @@ const Catalogo = () => {
             >
               CARGANDO CATÁLOGO...
             </motion.div>
+          ) : errorServer ? (
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-red-500 font-bold tracking-widest text-center py-20 border border-red-900/20 bg-red-900/5 rounded-xl"
+            >
+              ERROR: NO SE PUDO CONECTAR CON EL SERVIDOR.<br/>
+              <span className="text-xs text-gray-500 mt-2 block italic">Verifica que el Backend esté encendido en el puerto 5000.</span>
+            </motion.div>
           ) : (
             <motion.div 
               key={lineaActiva}
@@ -107,7 +119,6 @@ const Catalogo = () => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
             >
-              {/* Encabezados */}
               <div className="mb-12">
                 <h2 className="font-bold tracking-[0.4em] uppercase text-xs mb-4" style={{ color: lineaActiva === 'PREMIUM' ? '#D4AF37' : '#2563eb' }}>
                   {lineaActiva === 'PREMIUM' ? 'Nutrición de Campeones' : 'Rendimiento Profesional'}
@@ -119,7 +130,6 @@ const Catalogo = () => {
                 </h1>
               </div>
 
-              {/* Grid de Productos */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
                 {productosFiltrados.length > 0 ? (
                   productosFiltrados.map((producto) => (
@@ -129,7 +139,7 @@ const Catalogo = () => {
                     />
                   ))
                 ) : (
-                  <p className="text-white opacity-50">No hay productos disponibles en esta línea.</p>
+                  <p className="text-white opacity-50 italic">No hay productos disponibles en esta línea.</p>
                 )}
               </div>
             </motion.div>
