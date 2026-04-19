@@ -3,94 +3,81 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { PackagePlus, PackageMinus, History, X, User, ClipboardList, Save, Edit3, DollarSign } from 'lucide-react';
 
 const Logistica = () => {
-  // 1. Estado de Stock y Logs
-  const [stock, setStock] = useState([]);
-  const [logs, setLogs] = useState([]);
+  // 1. Estado inicial de los productos (Estaticos pero actualizables)
+  const initialProducts = [
+    { id: 1, name: "BAL. POLO", line: "Premium", price: 15000, qty: 10, color: "#D4AF37" },
+    { id: 2, name: "BAL. PSC", line: "Premium", price: 15000, qty: 10, color: "#D4AF37" },
+    { id: 3, name: "BAL. YEGUAS", line: "Premium", price: 15000, qty: 10, color: "#D4AF37" },
+    { id: 4, name: "BAL. POTRILLOS", line: "Premium", price: 15000, qty: 10, color: "#D4AF37" },
+    { id: 5, name: "BAL. EQUITACION", line: "Premium", price: 15000, qty: 10, color: "#D4AF37" },
+    { id: 6, name: "BAL. VIGOR", line: "Premium", price: 15000, qty: 10, color: "#D4AF37" },
+    { id: 7, name: "BAL. MANTENIMIENTO", line: "Professional", price: 12000, qty: 10, color: "#2563eb" },
+    { id: 8, name: "BAL. DEPORTE", line: "Professional", price: 12500, qty: 10, color: "#2563eb" },
+  ];
+
+  // 2. Estados de Stock y Logs con persistencia Local
+  const [stock, setStock] = useState(() => {
+    const savedStock = localStorage.getItem('avangard_stock');
+    return savedStock ? JSON.parse(savedStock) : initialProducts;
+  });
+
+  const [logs, setLogs] = useState(() => {
+    const savedLogs = localStorage.getItem('logistica_logs');
+    return savedLogs ? JSON.parse(savedLogs) : [];
+  });
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalType, setModalType] = useState('ingreso'); // 'ingreso', 'entrega' o 'precio'
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [transaction, setTransaction] = useState({ qty: '', recipient: '', notes: '', newPrice: '' });
 
-  // Carga inicial de datos desde la DB
-  const fetchProductos = async () => {
-    try {
-      const res = await fetch('http://localhost:5000/api/products');
-      const data = await res.json();
-      setStock(data);
-    } catch (err) {
-      console.error("Error cargando inventario:", err);
-    }
-  };
-
-  // Cargar historial persistido (si el backend lo soporta, sino mantiene memoria local en la sesión)
+  // Guardar en localStorage automáticamente cuando cambien los estados
   useEffect(() => {
-    fetchProductos();
-    // Intentar cargar logs de localStorage para mantener "memoria" entre recargas de página
-    const savedLogs = localStorage.getItem('logistica_logs');
-    if (savedLogs) {
-      setLogs(JSON.parse(savedLogs));
-    }
-  }, []);
+    localStorage.setItem('avangard_stock', JSON.stringify(stock));
+  }, [stock]);
 
-  // Persistir logs localmente cada vez que cambian
   useEffect(() => {
     localStorage.setItem('logistica_logs', JSON.stringify(logs));
   }, [logs]);
 
-  // Función para procesar movimientos y precios
-  const handleAction = async (e) => {
+  // Función para procesar movimientos y precios sin Backend (Lógica Local)
+  const handleAction = (e) => {
     e.preventDefault();
     
-    try {
-      let updatedData = {};
+    let updatedStock = [...stock];
+    const productIndex = updatedStock.findIndex(p => p.id === selectedProduct.id);
 
-      if (modalType === 'precio') {
-        updatedData = { price: parseFloat(transaction.newPrice) };
-      } else {
-        const amount = parseInt(transaction.qty);
-        // Lógica de cálculo de stock
-        const newQty = modalType === 'ingreso' 
-          ? selectedProduct.qty + amount 
-          : selectedProduct.qty - amount;
-        
-        updatedData = { qty: newQty };
+    if (modalType === 'precio') {
+      updatedStock[productIndex].price = parseFloat(transaction.newPrice);
+    } else {
+      const amount = parseInt(transaction.qty);
+      const newQty = modalType === 'ingreso' 
+        ? updatedStock[productIndex].qty + amount 
+        : updatedStock[productIndex].qty - amount;
+      
+      updatedStock[productIndex].qty = newQty;
 
-        // Registro de Actividad (Log)
-        const newLog = {
-          id: Date.now(),
-          date: new Date().toLocaleString('es-AR', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-          }),
-          product: selectedProduct.name,
-          type: modalType,
-          qty: amount,
-          recipient: transaction.recipient || 'Depósito Central',
-        };
-        setLogs([newLog, ...logs]);
-      }
-
-      // Petición al Backend
-      const response = await fetch(`http://localhost:5000/api/products/${selectedProduct._id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedData)
-      });
-
-      if (response.ok) {
-        fetchProductos();
-        setIsModalOpen(false);
-        setTransaction({ qty: '', recipient: '', notes: '', newPrice: '' });
-      } else {
-        alert("Error al actualizar la base de datos");
-      }
-
-    } catch (err) {
-      console.error("Error en la operación:", err);
+      // Registro de Actividad (Log)
+      const newLog = {
+        id: Date.now(),
+        date: new Date().toLocaleString('es-AR', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        }),
+        product: selectedProduct.name,
+        type: modalType,
+        qty: amount,
+        recipient: transaction.recipient || 'Depósito Central',
+      };
+      setLogs([newLog, ...logs]);
     }
+
+    setStock(updatedStock);
+    setIsModalOpen(false);
+    setTransaction({ qty: '', recipient: '', notes: '', newPrice: '' });
   };
 
   return (
@@ -113,13 +100,13 @@ const Logistica = () => {
             </h2>
             {stock.map((item) => (
               <motion.div 
-                layoutId={`item-${item._id}`}
-                key={item._id} 
+                layoutId={`item-${item.id}`}
+                key={item.id} 
                 className="group bg-[#0f0f0f] border border-gray-900 p-6 rounded-xl flex justify-between items-center hover:border-gray-700 transition-all shadow-xl"
               >
                 <div className="flex flex-col gap-1">
                   <div className="flex items-center gap-3">
-                    <span className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color || (item.line === 'Premium' ? '#D4AF37' : '#2563eb') }}></span>
+                    <span className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color }}></span>
                     <h3 className="text-lg font-black uppercase italic tracking-tight">{item.name}</h3>
                     <button 
                       onClick={() => { setSelectedProduct(item); setModalType('precio'); setTransaction({...transaction, newPrice: item.price}); setIsModalOpen(true); }}
@@ -162,7 +149,7 @@ const Logistica = () => {
             ))}
           </div>
 
-          {/* REGISTRO DE LOGS (CON MEMORIA) */}
+          {/* REGISTRO DE LOGS (CON MEMORIA LOCAL) */}
           <div className="bg-[#0a0a0a] rounded-2xl border border-gray-900 p-6 h-[700px] flex flex-col shadow-2xl">
             <h2 className="flex items-center justify-between text-xs font-bold uppercase tracking-[0.3em] text-[#D4AF37] mb-6">
               <span className="flex items-center gap-2"><History size={16} /> Registro de Movimientos</span>

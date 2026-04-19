@@ -77,13 +77,19 @@ const Contacto = () => {
               className="w-full bg-black border border-gray-800 p-4 rounded focus:border-[#D4AF37] outline-none transition-all text-gray-400"
             >
               {/* Línea Premium */}
-              <option value="BAL. POLO">BAL. POLO (Premium)</option>
-              <option value="BAL. PSC">BAL. PSC (Premium)</option>
-              <option value="BAL. YEGUAS">BAL. YEGUAS (Premium)</option>
-              <option value="BAL. POTRILLOS">BAL. POTRILLOS (Premium)</option>
+              <optgroup label="Línea Premium Elite" className="bg-[#0f0f0f]">
+                <option value="BAL. POLO">BAL. POLO</option>
+                <option value="BAL. PSC">BAL. PSC</option>
+                <option value="BAL. YEGUAS">BAL. YEGUAS</option>
+                <option value="BAL. POTRILLOS">BAL. POTRILLOS</option>
+                <option value="BAL. EQUITACION">BAL. EQUITACION</option>
+                <option value="BAL. VIGOR">BAL. VIGOR</option>
+              </optgroup>
               {/* Línea Professional */}
-              <option value="BAL. MANTENIMIENTO">BAL. MANTENIMIENTO (Professional)</option>
-              <option value="BAL. DEPORTE">BAL. DEPORTE (Professional)</option>
+              <optgroup label="Línea Professional" className="bg-[#0f0f0f]">
+                <option value="BAL. MANTENIMIENTO">BAL. MANTENIMIENTO</option>
+                <option value="BAL. DEPORTE">BAL. DEPORTE</option>
+              </optgroup>
             </select>
           </div>
           <div>
