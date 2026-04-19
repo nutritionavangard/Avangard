@@ -49,11 +49,15 @@ const productosData = {
   },
   "equitacion": { 
     name: "BAL. EQUITACION", 
+    // Corregido: Usamos la imagen importada correspondiente a Equitación
     img: imgEquitacion, 
     color: "#D4AF37", 
-    tagline: "CONCENTRACIÓN Y POTENCIA",
-    desc: "Este alimento balanceado está elaborado con materias primas de primera calidad. Provee niveles de energía balanceados a partir de fibra degradable, almidón y lípidos; y cantidades de proteína de muy alto valor biológico para un adecuado funcionamiento de las masas musculares. Proporciona minerales y vitaminas necesarios para un excelente rendimiento deportivo.",
-    recomendacion: "Se recomienda utilizar a un nivel del 0,5 al 1% del peso vivo, repartido en dos comidas después del consumo de heno.",
+    // Nuevo Speech: Orientado a la disciplina (Salto/Adiestramiento)
+    tagline: "EQUILIBRIO, CONCENTRACIÓN Y POTENCIA",
+    desc: "Alimento balanceado premium diseñado para caballos de salto y adiestramiento. Su fórmula de vanguardia proporciona una liberación controlada de energía para mantener la concentración durante la rutina, junto con proteínas de alto valor biológico para una musculatura potente y elástica. Aporta el balance perfecto de micro-nutrientes para sostener la exigencia articular y ósea de la alta competencia.",
+    // Recomendación ajustada para el tipo de esfuerzo
+    recomendacion: "Se recomienda suministrar diariamente entre el 0,6 y el 1% del peso vivo del animal, fraccionado en 2 o 3 raciones, siempre posterior al consumo de forraje de alta calidad.",
+    // Mantenemos la información nutricional solicitada (copiada de polo)
     nutricion: [
       { label: "Proteína", value: "13 %" }, { label: "Energía Digestible", value: "2.900 Kcal" },
       { label: "Humedad", value: "10 %" }, { label: "Calcio", value: "0,70 %" },
@@ -70,6 +74,7 @@ const productosData = {
       { label: "Tiamina", value: "7,4 mg" }, { label: "Vitamina B6", value: "9,0 mg" },
       { label: "Vitamina B12", value: "322,0 mg" }, { label: "Vitamina C", value: "140,0 mg" }
     ],
+    // Mantenemos los aminoácidos solicitados (copiados de polo)
     aminoacidos: [
       { label: "Arginina", value: "0,94" }, { label: "Histidina", value: "0,38" },
       { label: "Isoleucina", value: "0,56" }, { label: "Leucina", value: "1,13" },
@@ -77,7 +82,8 @@ const productosData = {
       { label: "Cistina", value: "0,31" }, { label: "Fenilalanina", value: "0,71" },
       { label: "Tirosina", value: "0,48" }, { label: "Valina", value: "0,54" }
     ],
-    ingredientes: "maíz, avena, cebada, pellet de soja, poroto de soja desactivado, afrechillo de trigo, harina de alfalfa, carbonato de calcio, fosfato mono-bicálcico, cloruro de sodio, óxido de magnesio, microminerales, vitaminas, aminoácidos, antioxidantes, levaduras, secuestrante de micotoxinas y saborizantes."
+    // Ingredientes ajustados para la descripción
+    ingredientes: "Maíz, avena, cebada, pellet de soja, poroto de soja desactivado, afrechillo de trigo, harina de alfalfa, carbonato de calcio, fosfato mono-bicálcico, cloruro de sodio, óxido de magnesio, núcleo micromineral quelatado, complejo vitamínico completo, aminoácidos esenciales, levaduras vivas, secuestrante de micotoxinas y saborizantes."
   },
   "psc": { 
     name: "BAL. PSC", 
