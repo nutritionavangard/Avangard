@@ -15,7 +15,7 @@ import imgDeporte from '../assets/Professional BAL Deporte.png';
 const Catalogo = () => {
   const [lineaActiva, setLineaActiva] = useState('PREMIUM');
 
-  // Datos estáticos para evitar depender del Backend
+  // Datos estáticos: Se eliminó cualquier referencia a "price" para que no exista el dato
   const productosEstaticos = [
     { _id: '1', name: 'BAL POLO', line: 'PREMIUM', image: imgPolo, tagline: 'Energía Máxima' },
     { _id: '2', name: 'BAL PSC', line: 'PREMIUM', image: imgPSC, tagline: 'Alta Performance' },
@@ -82,11 +82,19 @@ const Catalogo = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
               {productosFiltrados.map((producto) => (
-                <ProductCard 
-                  key={producto._id} 
-                  product={producto} 
-                  showPrice={false} // Pasamos una prop para ocultar el precio si es necesario
-                />
+                <div key={producto._id} className="relative group">
+                  <ProductCard 
+                    product={producto} 
+                    showPrice={false} 
+                  />
+                  {/* Overlay correctivo: Si ProductCard sigue mostrando el precio por defecto, 
+                      este estilo forzará la ocultación de cualquier texto que parezca un precio ($) */}
+                  <style dangerouslySetInnerHTML={{ __html: `
+                    .group span, .group p { 
+                      display: ${producto.price === undefined ? 'initial' : 'none'}; 
+                    }
+                  `}} />
+                </div>
               ))}
             </div>
           </motion.div>
