@@ -12,22 +12,26 @@ import Catalogo from './pages/Catalogo';
 import Contacto from './pages/Contacto';
 import Logistica from './pages/Logistica';
 import Login from './pages/Login';
-import DetalleProducto from './pages/DetalleProducto'; // <--- IMPORTANTE: Asegurate de que la ruta sea correcta
+import DetalleProducto from './pages/DetalleProducto';
 
 function App() {
   const location = useLocation();
 
   // Sistema de Keep-Alive para evitar que Render se duerma (Plan Free)
+  // IMPORTANTE: Apuntamos al backend para que la base de datos esté siempre lista
   useEffect(() => {
     const interval = setInterval(() => {
-      fetch('/').then(() => console.log('Ping de actividad enviado.'));
-    }, 600000); // Se ejecuta cada 10 minutos
+      fetch('http://localhost:5000/api/products') // Cambia a tu URL de Render cuando hagas deploy
+        .then(() => console.log('Ping de actividad enviado al Backend.'))
+        .catch(err => console.log('Error en ping:', err));
+    }, 600000); // 10 minutos
     
     return () => clearInterval(interval);
   }, []);
 
   return (
     <div className="min-h-screen bg-[#050505]">
+      {/* El Navbar queda fijo fuera de las rutas para consistencia */}
       <Navbar />
       
       <AnimatePresence mode="wait">
@@ -48,7 +52,7 @@ function App() {
               </Layout>
             } 
           />
-          {/* NUEVA RUTA: Sin esto, al recargar en un producto te dará 404 siempre */}
+          {/* Ruta dinámica para ver el detalle de cada producto */}
           <Route 
             path="/producto/:id" 
             element={
@@ -65,6 +69,7 @@ function App() {
               </Layout>
             } 
           />
+          {/* Panel de administración de stock y precios */}
           <Route 
             path="/logistica" 
             element={
