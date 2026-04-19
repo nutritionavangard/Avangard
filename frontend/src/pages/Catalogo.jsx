@@ -15,16 +15,16 @@ import imgDeporte from '../assets/Professional BAL Deporte.png';
 const Catalogo = () => {
   const [lineaActiva, setLineaActiva] = useState('PREMIUM');
 
-  // Datos estáticos: Se eliminó cualquier referencia a "price" para que no exista el dato
+  // Se actualizaron los _id para que coincidan con las rutas de detalle (polo, equitacion, etc.)
   const productosEstaticos = [
-    { _id: '1', name: 'BAL POLO', line: 'PREMIUM', image: imgPolo, tagline: 'Energía Máxima' },
-    { _id: '2', name: 'BAL PSC', line: 'PREMIUM', image: imgPSC, tagline: 'Alta Performance' },
-    { _id: '3', name: 'BAL YEGUAS', line: 'PREMIUM', image: imgYeguas, tagline: 'Reproducción y Cría' },
-    { _id: '4', name: 'BAL POTRILLOS', line: 'PREMIUM', image: imgPotrillos, tagline: 'Crecimiento Óptimo' },
-    { _id: '5', name: 'BAL EQUITACION', line: 'PREMIUM', image: imgEquitacion, tagline: 'Salto y Adiestramiento' },
-    { _id: '6', name: 'BAL VIGOR', line: 'PREMIUM', image: imgVigor, tagline: 'Fuerza Muscular' },
-    { _id: '7', name: 'BAL MANTENIMIENTO', line: 'PROFESSIONAL', image: imgMantenimiento, tagline: 'Salud Diaria' },
-    { _id: '8', name: 'BAL DEPORTE', line: 'PROFESSIONAL', image: imgDeporte, tagline: 'Resistencia Vital' }
+    { _id: 'polo', name: 'BAL POLO', line: 'PREMIUM', image: imgPolo, tagline: 'Energía Máxima' },
+    { _id: 'psc', name: 'BAL PSC', line: 'PREMIUM', image: imgPSC, tagline: 'Alta Performance' },
+    { _id: 'yeguas', name: 'BAL YEGUAS', line: 'PREMIUM', image: imgYeguas, tagline: 'Reproducción y Cría' },
+    { _id: 'potrillos', name: 'BAL POTRILLOS', line: 'PREMIUM', image: imgPotrillos, tagline: 'Crecimiento Óptimo' },
+    { _id: 'equitacion', name: 'BAL EQUITACION', line: 'PREMIUM', image: imgEquitacion, tagline: 'Salto y Adiestramiento' },
+    { _id: 'vigor', name: 'BAL VIGOR', line: 'PREMIUM', image: imgVigor, tagline: 'Fuerza Muscular' },
+    { _id: 'mantenimiento', name: 'BAL MANTENIMIENTO', line: 'PROFESSIONAL', image: imgMantenimiento, tagline: 'Salud Diaria' },
+    { _id: 'deporte', name: 'BAL DEPORTE', line: 'PROFESSIONAL', image: imgDeporte, tagline: 'Resistencia Vital' }
   ];
 
   const botones = [
@@ -87,8 +87,6 @@ const Catalogo = () => {
                     product={producto} 
                     showPrice={false} 
                   />
-                  {/* Overlay correctivo: Si ProductCard sigue mostrando el precio por defecto, 
-                      este estilo forzará la ocultación de cualquier texto que parezca un precio ($) */}
                   <style dangerouslySetInnerHTML={{ __html: `
                     .group span, .group p { 
                       display: ${producto.price === undefined ? 'initial' : 'none'}; 
