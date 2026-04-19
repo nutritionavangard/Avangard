@@ -5,6 +5,8 @@ const {
     updateStock, 
     getMovementsByProduct 
 } = require('../controllers/stockController');
+// Importamos el controlador de productos para poder actualizar el precio desde aquí
+const { updateProduct } = require('../controllers/productController'); 
 const { protect } = require('../middleware/authMiddleware');
 
 // @route   GET /api/stock
@@ -13,7 +15,7 @@ const { protect } = require('../middleware/authMiddleware');
 router.get('/', protect, getStockStatus);
 
 // @route   POST /api/stock/update
-// @desc    Registrar un Ingreso, Egreso o Entrega de mercadería
+// @desc    Registrar un Ingreso o Egreso (Entrega) de mercadería
 // @access  Privado (Solo Admin)
 router.post('/update', protect, updateStock);
 
@@ -21,5 +23,11 @@ router.post('/update', protect, updateStock);
 // @desc    Obtener el historial de movimientos (Log) de un producto específico
 // @access  Privado (Solo Admin)
 router.get('/movements/:productId', protect, getMovementsByProduct);
+
+// --- NUEVA RUTA PARA EL PRECIO ---
+// @route   PUT /api/stock/price/:id
+// @desc    Actualizar el precio de un producto desde el panel de logística
+// @access  Privado (Solo Admin)
+router.put('/price/:id', protect, updateProduct);
 
 module.exports = router;

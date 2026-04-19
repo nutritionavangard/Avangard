@@ -18,12 +18,12 @@ exports.getProducts = async (req, res) => {
 exports.createProduct = async (req, res) => {
     try {
         // Desestructuramos ambos campos (desc y description) para evitar fallos de carga
-        const { name, desc, description, line, price, image, qty, color } = req.body;
+        const { name, desc, description, line, price, image, qty, color, tagline } = req.body;
 
         // 1. Crear el producto
-        // Usamos (desc || description) para que funcione sin importar cómo envíes el dato
         const product = new Product({ 
             name, 
+            tagline,
             desc: desc || description, 
             line, 
             price, 
@@ -65,17 +65,20 @@ exports.createProduct = async (req, res) => {
     }
 };
 
-// @desc    Actualizar producto (Precio, Descripción, etc.)
+// @desc    Actualizar producto (Precio, Stock, Descripción, etc.)
 // @route   PUT /api/products/:id
 exports.updateProduct = async (req, res) => {
     try {
-        const { price, desc, description, name, color, line } = req.body;
+        const { price, desc, description, name, color, line, qty, tagline } = req.body;
         
         const product = await Product.findById(req.params.id);
 
         if (product) {
+            // Actualizamos solo los campos que vienen en el body, manteniendo lo anterior si no vienen
             product.name = name || product.name;
+            product.tagline = tagline || product.tagline;
             product.price = price !== undefined ? price : product.price;
+            product.qty = qty !== undefined ? qty : product.qty; // Agregado para sincronizar stock desde logística
             product.desc = desc || description || product.desc;
             product.color = color || product.color;
             product.line = line || product.line;
