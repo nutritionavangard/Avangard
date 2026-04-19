@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
@@ -260,33 +260,7 @@ const productosData = {
 
 const DetalleProducto = () => {
   const { id } = useParams();
-  const [precioDinamico, setPrecioDinamico] = useState("Cargando...");
   const prod = productosData[id] || productosData["polo"];
-
-  useEffect(() => {
-    const fetchPrecio = async () => {
-      try {
-        const response = await fetch('http://localhost:5000/api/products');
-        const data = await response.json();
-        
-        // Buscamos el producto en la lista de la API por nombre parcial
-        const productoEncontrado = data.find(p => 
-          p.name.toLowerCase().includes(id.toLowerCase())
-        );
-
-        if (productoEncontrado && productoEncontrado.price) {
-          setPrecioDinamico(`$${productoEncontrado.price.toLocaleString()}`);
-        } else {
-          setPrecioDinamico("Consultar");
-        }
-      } catch (error) {
-        console.error("Error cargando precio:", error);
-        setPrecioDinamico("Consultar");
-      }
-    };
-
-    fetchPrecio();
-  }, [id]);
 
   return (
     <div className="bg-[#050505] min-h-screen pt-32 pb-20 px-8 text-white">
@@ -312,10 +286,9 @@ const DetalleProducto = () => {
               <p style={{ color: prod.color }} className="text-sm italic">{prod.recomendacion}</p>
             </div>
 
-            <div className="flex items-center justify-between border-t border-gray-900 pt-8">
-              <span className="text-5xl font-light italic">{precioDinamico}</span>
+            <div className="flex items-center justify-start border-t border-gray-900 pt-8">
               <button 
-                className="bg-white text-black px-10 py-5 font-black uppercase text-xs tracking-widest transition-all duration-500 hover:text-white"
+                className="bg-white text-black px-12 py-5 font-black uppercase text-sm tracking-widest transition-all duration-500 hover:text-white"
                 onMouseEnter={(e) => e.target.style.backgroundColor = prod.color}
                 onMouseLeave={(e) => e.target.style.backgroundColor = 'white'}
               >
