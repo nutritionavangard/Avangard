@@ -4,44 +4,40 @@ const cors = require('cors');
 const path = require('path'); 
 const mongoose = require('mongoose');
 const fs = require('fs');
-const bcrypt = require('bcryptjs'); // Necesario para la contraseña
 const connectDB = require('./config/db');
 
-// Importamos el modelo de Usuario para el script de creación
+// Importamos el modelo de Usuario
 const User = require('./models/User'); 
 
 const app = express();
 
-// 1. Conectar a la BD y crear Admin
+// 1. Conectar a la BD y ejecutar script de Admin
 connectDB().then(() => {
-    // Script para forzar la creación del usuario administrador
     const createYourAdmin = async () => {
         try {
             const email = "nutritionavangard@gmail.com";
             const password = "Avangardnutrition2000!";
             
-            // Buscamos si ya existe
             const userExists = await User.findOne({ email });
             
             if (!userExists) {
-                const salt = await bcrypt.genSalt(10);
-                const hashedPassword = await bcrypt.hash(password, salt);
-                
+                // Pasamos la contraseña en texto plano. 
+                // Tu modelo User.js la encriptará automáticamente al usar .create()
                 await User.create({
                     name: "Admin Avangard",
                     email: email,
-                    password: hashedPassword,
+                    password: password, 
                     isAdmin: true,
-                    role: "admin" // Por si tu modelo usa 'role' en vez de 'isAdmin'
+                    role: "admin" 
                 });
                 console.log("✅ USUARIO ADMIN CREADO: " + email);
             } else {
-                // Si existe pero la carpeta estaba vacía, quizás es otra base de datos.
-                // Forzamos la actualización de la contraseña por si acaso.
-                const salt = await bcrypt.genSalt(10);
-                userExists.password = await bcrypt.hash(password, salt);
+                // Si el usuario ya existe, forzamos la actualización de la contraseña.
+                // Al asignar el valor y luego usar .save(), el middleware del modelo 
+                // volverá a encriptarla correctamente.
+                userExists.password = password;
                 await userExists.save();
-                console.log("ℹ️ Usuario actualizado con la nueva contraseña.");
+                console.log("ℹ️ Contraseña de administrador sincronizada y corregida.");
             }
         } catch (error) {
             console.error("❌ Error en el script de usuario:", error.message);
@@ -81,8 +77,7 @@ app.get('/api/test-db', async (req, res) => {
             databaseName: mongoose.connection.name,
             collections: collections.map(c => c.name),
             env: process.env.NODE_ENV,
-            msg: "Si ves colecciones aquí, la conexión es exitosa.",
-            checkPath: path.join(__dirname, 'dist')
+            msg: "Conexión exitosa a MongoDB"
         });
     } catch (err) {
         res.status(500).json({
@@ -97,7 +92,7 @@ app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/products', require('./routes/productRoutes'));
 app.use('/api/stock', require('./routes/stockRoutes'));
 
-// --- 5. CONFIGURACIÓN PARA RENDER ---
+// --- 5. CONFIGURACIÓN PARA RENDER (Frontend) ---
 const frontendPath = path.join(__dirname, 'dist'); 
 
 if (fs.existsSync(frontendPath)) {
