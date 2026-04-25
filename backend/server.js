@@ -3,13 +3,52 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path'); 
 const mongoose = require('mongoose');
-const fs = require('fs'); // Añadido para verificar carpetas
+const fs = require('fs');
+const bcrypt = require('bcryptjs'); // Necesario para la contraseña
 const connectDB = require('./config/db');
+
+// Importamos el modelo de Usuario para el script de creación
+const User = require('./models/User'); 
 
 const app = express();
 
-// 1. Conectar a la BD
-connectDB();
+// 1. Conectar a la BD y crear Admin
+connectDB().then(() => {
+    // Script para forzar la creación del usuario administrador
+    const createYourAdmin = async () => {
+        try {
+            const email = "nutritionavangard@gmail.com";
+            const password = "Avangardnutrition2000!";
+            
+            // Buscamos si ya existe
+            const userExists = await User.findOne({ email });
+            
+            if (!userExists) {
+                const salt = await bcrypt.genSalt(10);
+                const hashedPassword = await bcrypt.hash(password, salt);
+                
+                await User.create({
+                    name: "Admin Avangard",
+                    email: email,
+                    password: hashedPassword,
+                    isAdmin: true,
+                    role: "admin" // Por si tu modelo usa 'role' en vez de 'isAdmin'
+                });
+                console.log("✅ USUARIO ADMIN CREADO: " + email);
+            } else {
+                // Si existe pero la carpeta estaba vacía, quizás es otra base de datos.
+                // Forzamos la actualización de la contraseña por si acaso.
+                const salt = await bcrypt.genSalt(10);
+                userExists.password = await bcrypt.hash(password, salt);
+                await userExists.save();
+                console.log("ℹ️ Usuario actualizado con la nueva contraseña.");
+            }
+        } catch (error) {
+            console.error("❌ Error en el script de usuario:", error.message);
+        }
+    };
+    createYourAdmin();
+});
 
 // 2. Middlewares Globales
 app.use(cors({
@@ -43,7 +82,7 @@ app.get('/api/test-db', async (req, res) => {
             collections: collections.map(c => c.name),
             env: process.env.NODE_ENV,
             msg: "Si ves colecciones aquí, la conexión es exitosa.",
-            checkPath: path.join(__dirname, 'dist') // Para ver dónde busca el servidor
+            checkPath: path.join(__dirname, 'dist')
         });
     } catch (err) {
         res.status(500).json({
@@ -58,20 +97,18 @@ app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/products', require('./routes/productRoutes'));
 app.use('/api/stock', require('./routes/stockRoutes'));
 
-// --- 5. CONFIGURACIÓN PARA RENDER (CON VERIFICACIÓN DE CARPETA) ---
+// --- 5. CONFIGURACIÓN PARA RENDER ---
 const frontendPath = path.join(__dirname, 'dist'); 
 
 if (fs.existsSync(frontendPath)) {
-    // Si la carpeta existe, servimos el frontend normalmente
     app.use(express.static(frontendPath));
     app.get(/^\/(?!api).*/, (req, res) => {
         res.sendFile(path.join(frontendPath, 'index.html'));
     });
 } else {
-    // Si la carpeta NO existe (lo que causaba el error ENOENT), evitamos el crash
-    console.warn("⚠️ ADVERTENCIA: La carpeta 'dist' no fue encontrada en: " + frontendPath);
+    console.warn("⚠️ ADVERTENCIA: La carpeta 'dist' no fue encontrada.");
     app.get('/', (req, res) => {
-        res.send('Servidor Avangard Activo. La API funciona, pero el Frontend no fue compilado correctamente en esta ruta.');
+        res.send('Servidor Avangard Activo. API lista.');
     });
 }
 
