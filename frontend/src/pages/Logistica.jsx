@@ -18,14 +18,19 @@ import axios from 'axios';
 const Logistica = () => {
   const API_URL = import.meta.env.VITE_API_URL || 'https://avangard-mdpp.onrender.com';
 
-  // CATALOGO DE PRODUCTOS (Modificá esta lista con tus nombres reales)
+  // CATALOGO DE PRODUCTOS
   const CATALOGO_PRODUCTOS = [
-    "Whey Protein Isolate",
-    "Creatina Monohidrato",
-    "BCAA 2:1:1",
-    "Pre-Workout Nitro",
-    "Quemador Gold",
-    "Mass Gainer"
+    "BAL POLO",
+    "BAL PSC",
+    "BAL Yeguas Reproductoras",
+    "BAL Potrillos",
+    "BAL Equitacion",
+    "Conc. Prot. Vigor. Equino",
+    "BAL Mantenimiento",
+    "BAL Deporte",
+    "Cubos de Alfalfa",
+    "Palet de Alfalfa",
+    "Avena"
   ];
 
   const [stock, setStock] = useState([]);
@@ -93,7 +98,7 @@ const Logistica = () => {
           qty: parseInt(transaction.qty),
           line: transaction.line,
           price: parseFloat(transaction.newPrice),
-          color: '#D4AF37' // Color institucional fijo
+          color: '#D4AF37'
         }, config);
       } else if (modalType === 'precio') {
         await axios.put(`${API_URL}/api/stock/price/${selectedProduct._id}`, 
@@ -111,7 +116,7 @@ const Logistica = () => {
         const newLog = {
           id: Date.now(),
           date: new Date().toLocaleString('es-AR'),
-          product: selectedProduct.name,
+          product: selectedProduct ? selectedProduct.name : transaction.name,
           type: modalType,
           qty: parseInt(transaction.qty),
           recipient: transaction.recipient || 'Depósito Central',
@@ -142,10 +147,10 @@ const Logistica = () => {
       <div className="max-w-6xl mx-auto">
         <header className="flex flex-col md:flex-row justify-between items-start md:items-end mb-16 gap-6">
           <div>
-            <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tighter leading-[0.85]">
+            <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tighter leading-[0.9] md:leading-[0.85]">
               Gestión de <br /><span className="text-[#D4AF37]">Stock</span>
             </h1>
-            <p className="text-gray-600 font-mono text-[10px] mt-4 tracking-[0.3em] uppercase border-l-2 border-[#D4AF37] pl-4">
+            <p className="text-gray-600 font-mono text-[10px] mt-6 tracking-[0.3em] uppercase border-l-2 border-[#D4AF37] pl-4">
               Avangard Logistics Terminal
             </p>
           </div>
@@ -249,6 +254,7 @@ const Logistica = () => {
                           value={transaction.line} onChange={(e) => setTransaction({...transaction, line: e.target.value})}>
                           <option value="Professional">Professional</option>
                           <option value="Premium">Premium</option>
+                          <option value="Standard">Standard</option>
                         </select>
                       </div>
                       <div>
