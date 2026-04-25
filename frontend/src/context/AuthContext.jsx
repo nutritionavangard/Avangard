@@ -8,7 +8,7 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const storedUser = localStorage.getItem('userInfo'); // Unificamos nombre a 'userInfo'
+        const storedUser = localStorage.getItem('userInfo');
         if (storedUser && storedUser !== "undefined") {
             try {
                 setUser(JSON.parse(storedUser));
@@ -24,26 +24,31 @@ export const AuthProvider = ({ children }) => {
         try {
             const { data } = await API.post('/auth/login', { email, password });
             
-            // Según tu backend, 'data' ya trae _id, name, email y token
-            // Lo guardamos todo junto para que sea fácil de recuperar
-            setUser(data);
+            // 1. PERSISTENCIA INMEDIATA: 
+            // Guardamos en LocalStorage antes que nada para que el Router lo encuentre.
             localStorage.setItem('userInfo', JSON.stringify(data));
             
-            return data; // Retornamos para que el componente de Login pueda redireccionar
+            // 2. ACTUALIZACIÓN DE ESTADO:
+            setUser(data);
+            
+            // 3. CONFIRMACIÓN:
+            return data; 
         } catch (error) {
             console.error("Error en login:", error);
-            throw error; // Re-lanzamos para que el UI muestre el error
+            throw error; 
         }
     };
 
     const logout = () => {
         setUser(null);
         localStorage.removeItem('userInfo');
-        // Evitamos usar clear() para no borrar otros datos locales (como logs)
+        // Redirección limpia al salir
+        window.location.href = '/login';
     };
 
     return (
         <AuthContext.Provider value={{ user, login, logout, loading }}>
+            {/* Solo renderizamos la app cuando loading es false */}
             {!loading && children}
         </AuthContext.Provider>
     );
