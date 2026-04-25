@@ -10,29 +10,34 @@ const app = express();
 connectDB();
 
 // 2. Middlewares Globales
-// Simplificamos el CORS para evitar bloqueos por dominios mal escritos
 app.use(cors({
-    origin: '*', // Permite peticiones desde cualquier lugar (Ideal para pruebas en iPad)
+    origin: '*', 
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-// Aumentamos el límite de tamaño para fotos de productos
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 // 3. Servir imágenes estáticas
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// 4. Rutas
+// --- 4. RUTAS DE LA API (Deben ir ANTES que cualquier configuración de Frontend) ---
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/products', require('./routes/productRoutes'));
 app.use('/api/stock', require('./routes/stockRoutes'));
 
-// 5. Manejo de rutas inexistentes
-app.use((req, res) => {
-    res.status(404).json({ message: "Ruta no encontrada en el servidor de Avangard" });
-});
+// --- 5. CONFIGURACIÓN PARA RENDER (Frontend + Backend unificados) ---
+// Si estás subiendo el build de React al mismo servidor de Express:
+if (process.env.NODE_ENV === 'production' || true) { // Forzamos true para Render
+    const frontendPath = path.join(__dirname, 'dist'); // O 'build', según tu proyecto
+    app.use(express.static(frontendPath));
+
+    // Esta es la línea que "atrapa" todo lo que NO sea la API
+    app.get(/^\/(?!api).*/, (req, res) => {
+        res.sendFile(path.join(frontendPath, 'index.html'));
+    });
+}
 
 // 6. Manejo de errores global
 app.use((err, req, res, next) => {

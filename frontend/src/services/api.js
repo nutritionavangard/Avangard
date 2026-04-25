@@ -1,48 +1,49 @@
 import axios from 'axios';
 
 const API = axios.create({
-    // Asegurate de que esta sea la URL actual de tu backend en Render
+    // Aseguramos que apunte a la URL unificada de Avangard
     baseURL: 'https://avangard-nutrition.onrender.com/api',
-    timeout: 50000, // Le damos 50 segundos (Render Free a veces tarda en "despertar")
+    timeout: 50000, // 50 segundos para despertar al servidor de Render
 });
 
 // INTERCEPTOR DE PETICIÓN: Pega el token automáticamente
 API.interceptors.request.use((config) => {
     try {
         const storedUser = localStorage.getItem('userInfo');
-        if (storedUser) {
+        if (storedUser && storedUser !== "undefined") {
             const userData = JSON.parse(storedUser);
             if (userData && userData.token) {
                 config.headers.Authorization = `Bearer ${userData.token}`;
             }
         }
     } catch (err) {
-        console.error("Error leyendo token del localStorage", err);
+        console.error("Error en interceptor de petición:", err);
     }
     return config;
 }, (error) => {
     return Promise.reject(error);
 });
 
-// INTERCEPTOR DE RESPUESTA: Evita el cierre de sesión "falso"
+// INTERCEPTOR DE RESPUESTA: Manejo inteligente de errores
 API.interceptors.response.use(
     (response) => response,
     (error) => {
-        // Si el servidor responde un 401 real
-        if (error.response && error.response.status === 401) {
-            // Solo redirigir si no estamos ya logueando
+        const { response, code } = error;
+
+        // 1. SESIÓN EXPIRADA (401 Real)
+        if (response && response.status === 401) {
+            // Solo limpiamos si no estamos ya en el login para evitar bucles
             if (!window.location.pathname.includes('/login')) {
-                console.warn("Sesión expirada o token inválido. Redirigiendo...");
+                console.warn("Acceso denegado: Token inválido o expirado.");
                 localStorage.removeItem('userInfo');
                 window.location.href = '/login';
             }
         }
 
-        // Si es un error de red (Render caído o conexión cerrada)
-        if (!error.response || error.code === 'ECONNABORTED') {
-            console.error("Error de red o Timeout. No cerramos sesión, es culpa del servidor.");
-            // Aquí podrías lanzar un alert suave: 
-            // alert("El servidor está tardando. No te desloguees, intenta de nuevo en 10 segundos.");
+        // 2. ERROR DE RED / SERVER DORMIDO (Timeout o Network Error)
+        if (!response || code === 'ECONNABORTED') {
+            console.error("El servidor de Render está tardando en responder. No cerramos sesión.");
+            // No redirigimos, dejamos que el usuario reintente.
         }
 
         return Promise.reject(error);
