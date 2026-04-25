@@ -5,20 +5,17 @@ import {
   PackageMinus, 
   History, 
   X, 
-  User, 
   ClipboardList, 
-  Save, 
   Edit3, 
-  DollarSign,
   AlertCircle,
   PlusCircle
 } from 'lucide-react';
 import axios from 'axios';
 
 const Logistica = () => {
-  const API_URL = import.meta.env.VITE_API_URL || 'https://avangard-mdpp.onrender.com';
+  // Priorizamos la URL de producción para evitar errores de localhost en dispositivos externos
+  const API_URL = 'https://avangard-mdpp.onrender.com';
 
-  // CATALOGO DE PRODUCTOS
   const CATALOGO_PRODUCTOS = [
     "BAL POLO",
     "BAL PSC",
@@ -59,11 +56,15 @@ const Logistica = () => {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${API_URL}/api/products`);
-      setStock(Array.isArray(response.data) ? response.data : []);
       setErrorStatus(null);
+      // Timeout extendido para dar tiempo a Render a "despertar"
+      const response = await axios.get(`${API_URL}/api/products`, { timeout: 30000 });
+      setStock(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
-      setErrorStatus("Error de conexión con el servidor.");
+      console.error("Fetch error:", error);
+      setErrorStatus("El servidor está iniciando o la conexión es inestable. Reintentando...");
+      // Reintento automático en 5 segundos
+      setTimeout(fetchProducts, 5000);
     } finally {
       setLoading(false);
     }
@@ -85,7 +86,7 @@ const Logistica = () => {
       if (userInfo && userInfo !== "undefined") {
         token = JSON.parse(userInfo).token;
       }
-    } catch (e) { console.error("Error leyendo sesión"); }
+    } catch (e) { console.error("Error sesión"); }
 
     const config = {
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }
@@ -112,12 +113,13 @@ const Logistica = () => {
         }, config);
       }
 
-      if (modalType !== 'precio' && modalType !== 'nuevo') {
+      // Logica de logs locales
+      if (modalType !== 'precio') {
         const newLog = {
           id: Date.now(),
           date: new Date().toLocaleString('es-AR'),
-          product: selectedProduct ? selectedProduct.name : transaction.name,
-          type: modalType,
+          product: modalType === 'nuevo' ? transaction.name : selectedProduct.name,
+          type: modalType === 'nuevo' ? 'ingreso' : modalType,
           qty: parseInt(transaction.qty),
           recipient: transaction.recipient || 'Depósito Central',
         };
@@ -129,25 +131,30 @@ const Logistica = () => {
       setTransaction({ qty: '', recipient: '', newPrice: '', name: CATALOGO_PRODUCTOS[0], line: 'Professional' });
 
     } catch (error) {
-      alert(error.response?.status === 401 ? "Sesión expirada. Por favor, reingresá al sistema." : (error.response?.data?.message || "Error de red"));
+      if (error.response?.status === 401) {
+        alert("Sesión expirada. Por favor, reingresá.");
+        window.location.href = '/login';
+      } else {
+        alert(error.response?.data?.message || "Error de conexión con la terminal.");
+      }
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  if (loading) return (
+  if (loading && stock.length === 0) return (
     <div className="min-h-screen bg-black flex flex-col items-center justify-center text-[#D4AF37]">
       <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-[#D4AF37] mb-4"></div>
-      <p className="font-black italic uppercase tracking-widest text-[10px]">Actualizando Inventario...</p>
+      <p className="font-black italic uppercase tracking-widest text-[10px]">Sincronizando con Servidor...</p>
     </div>
   );
 
   return (
-    <div className="bg-[#050505] min-h-screen p-4 md:p-8 text-white pt-28 font-sans">
-      <div className="max-w-6xl mx-auto">
+    <div className="bg-[#050505] min-h-screen p-4 md:p-8 text-white pt-28 font-sans relative">
+      <div className="max-w-6xl mx-auto relative z-10">
         <header className="flex flex-col md:flex-row justify-between items-start md:items-end mb-16 gap-6">
-          <div>
-            <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tighter leading-[0.9] md:leading-[0.85]">
+          <div className="relative z-20">
+            <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tighter leading-[0.9]">
               Gestión de <br /><span className="text-[#D4AF37]">Stock</span>
             </h1>
             <p className="text-gray-600 font-mono text-[10px] mt-6 tracking-[0.3em] uppercase border-l-2 border-[#D4AF37] pl-4">
@@ -167,7 +174,15 @@ const Logistica = () => {
           </button>
         </header>
 
+        {errorStatus && (
+          <div className="bg-amber-950/20 border border-amber-900 text-amber-500 p-4 rounded-xl mb-8 flex items-center gap-3 animate-pulse">
+            <AlertCircle size={20} />
+            <p className="text-[10px] font-black uppercase tracking-widest">{errorStatus}</p>
+          </div>
+        )}
+
         <div className="grid lg:grid-cols-3 gap-8">
+          {/* Listado de Productos */}
           <div className="lg:col-span-2 space-y-4">
             <h2 className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.4em] text-gray-500 mb-2">
               <ClipboardList size={14} /> Ítems en Depósito ({stock.length})
@@ -204,6 +219,7 @@ const Logistica = () => {
             ))}
           </div>
 
+          {/* Historial Lateral */}
           <div className="bg-[#080808] rounded-3xl border border-gray-900 p-6 h-[600px] flex flex-col sticky top-24">
             <h2 className="flex items-center justify-between text-[10px] font-black uppercase tracking-[0.3em] text-[#D4AF37] mb-8">
               <span className="flex items-center gap-2"><History size={14} /> Historial</span>
@@ -227,6 +243,7 @@ const Logistica = () => {
         </div>
       </div>
 
+      {/* Modal Unificado */}
       <AnimatePresence>
         {isModalOpen && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/95 backdrop-blur-sm">
