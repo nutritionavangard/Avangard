@@ -4,11 +4,11 @@ import {
   PackagePlus, PackageMinus, History, X, ClipboardList, 
   Edit3, AlertCircle, PlusCircle, RefreshCw 
 } from 'lucide-react';
-import axios from 'axios';
+// IMPORTANTE: Usamos nuestra instancia configurada, no axios pelado
+import API from '../services/api'; 
 
 const Logistica = () => {
-  // Hardcode de la URL para evitar conflictos de variables de entorno
-  const API_URL = 'https://avangard-mdpp.onrender.com';
+  // Eliminamos la URL hardcodeada de aquí porque ya está en services/api.js
 
   const CATALOGO_PRODUCTOS = [
     "BAL POLO", "BAL PSC", "BAL Yeguas Reproductoras", "BAL Potrillos",
@@ -40,13 +40,12 @@ const Logistica = () => {
     try {
       setLoading(true);
       setErrorStatus(null);
-      // Aumentamos el timeout porque Render Free es lento para arrancar
-      const response = await axios.get(`${API_URL}/api/products`, { timeout: 40000 });
+      // Usamos API.get. La URL base ya es /api
+      const response = await API.get('/products');
       setStock(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
       console.error("Error de conexión:", error);
-      setErrorStatus("Sincronizando con la terminal... El servidor está tardando en responder.");
-      // Reintento automático más suave
+      setErrorStatus("Sincronizando con la terminal...");
       setTimeout(fetchProducts, 8000);
     } finally {
       setLoading(false);
@@ -63,43 +62,31 @@ const Logistica = () => {
     e.preventDefault();
     setIsSubmitting(true);
     
-    let token = null;
-    try {
-      const userInfo = localStorage.getItem('userInfo');
-      if (userInfo) {
-        token = JSON.parse(userInfo).token;
-      }
-    } catch (e) { console.error("Error sesión"); }
-
-    const config = {
-      headers: { 
-        'Content-Type': 'application/json', 
-        'Authorization': `Bearer ${token}` 
-      },
-      timeout: 45000 // Tiempo extra para operaciones de escritura
-    };
+    // Ya no necesitamos sacar el token a mano, lo hace el interceptor de API
 
     try {
       let response;
       if (modalType === 'nuevo') {
-        response = await axios.post(`${API_URL}/api/products`, {
-          name: transaction.name, qty: parseInt(transaction.qty),
-          line: transaction.line, price: parseFloat(transaction.newPrice),
+        response = await API.post('/products', {
+          name: transaction.name, 
+          qty: parseInt(transaction.qty),
+          line: transaction.line, 
+          price: parseFloat(transaction.newPrice),
           color: '#D4AF37'
-        }, config);
+        });
       } else if (modalType === 'precio') {
-        response = await axios.put(`${API_URL}/api/stock/price/${selectedProduct._id}`, 
-          { price: parseFloat(transaction.newPrice) }, config);
+        response = await API.put(`/stock/price/${selectedProduct._id}`, 
+          { price: parseFloat(transaction.newPrice) });
       } else {
-        response = await axios.post(`${API_URL}/api/stock/update`, { 
+        response = await API.post('/stock/update', { 
           productId: selectedProduct._id,
           type: modalType === 'ingreso' ? 'Ingreso' : 'Egreso',
           amount: parseInt(transaction.qty),
           recipient: transaction.recipient || 'Depósito Central'
-        }, config);
+        });
       }
 
-      // Si llegamos aquí, la operación fue exitosa
+      // Registro de Logs Local
       const newLog = {
         id: Date.now(),
         date: new Date().toLocaleString('es-AR'),
@@ -116,19 +103,16 @@ const Logistica = () => {
       setTransaction({ qty: '', recipient: '', newPrice: '', name: CATALOGO_PRODUCTOS[0], line: 'Professional' });
 
     } catch (error) {
-      // SOLO cerramos sesión si el error es explícitamente 401. 
-      // Si el error es de conexión (Network Error / Timeout), avisamos pero NO echamos al usuario.
-      if (error.response?.status === 401) {
-        alert("La sesión expiró realmente. Por favor reingresá.");
-        window.location.href = '/login';
-      } else {
-        alert("Error de red: El servidor de Render cerró la conexión. Intentá confirmar nuevamente en unos segundos.");
-      }
+      // El interceptor de API ya maneja el 401 (logout),
+      // aquí solo manejamos errores visuales de la operación
+      console.error("Error en operación:", error);
+      alert(error.response?.data?.message || "Error de red. El servidor está tardando.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  // ... (Resto del renderizado igual al tuyo)
   if (loading && stock.length === 0) return (
     <div className="min-h-screen bg-black flex flex-col items-center justify-center text-[#D4AF37]">
       <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-[#D4AF37] mb-4"></div>
