@@ -13,19 +13,19 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Credenciales acordadas
-    const ADMIN_EMAIL = "nutritionavangard@gmail.com";
-    const ADMIN_PASS = "Avangardnutrition2000!";
-
-    if (email === ADMIN_EMAIL && password === ADMIN_PASS) {
-      try {
-        await login(email, password);
-        navigate('/logistica');
-      } catch (error) {
-        alert("Error en el sistema de autenticación.");
-      }
-    } else {
-      alert("Credenciales incorrectas. Acceso denegado.");
+    try {
+      // Dejamos que el AuthContext y el Backend manejen la validación.
+      // Esto asegura que el token se guarde correctamente en el localStorage como 'userInfo'.
+      await login(email, password);
+      
+      // Si el login es exitoso, navegamos a logística.
+      navigate('/logistica');
+    } catch (error) {
+      console.error("Error en login:", error);
+      
+      // Si el backend responde con error (401), mostramos el mensaje real del servidor.
+      const errorMsg = error.response?.data?.message || "Error al conectar con el servidor.";
+      alert(errorMsg);
     }
   };
 
@@ -44,12 +44,18 @@ const Login = () => {
             <Lock size={24} />
           </div>
           
-          <h2 className="text-3xl font-black text-white mb-1 uppercase tracking-tighter">Acceso <span className="text-[#D4AF37]">Admin</span></h2>
-          <p className="text-gray-500 text-[10px] uppercase tracking-[0.3em] font-bold mb-8">Panel de Logística Avangard</p>
+          <h2 className="text-3xl font-black text-white mb-1 uppercase tracking-tighter">
+            Acceso <span className="text-[#D4AF37]">Admin</span>
+          </h2>
+          <p className="text-gray-500 text-[10px] uppercase tracking-[0.3em] font-bold mb-8">
+            Panel de Logística Avangard
+          </p>
           
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-[10px] uppercase font-bold text-gray-600 mb-2 ml-1 tracking-widest">Email Corporativo</label>
+              <label className="block text-[10px] uppercase font-bold text-gray-600 mb-2 ml-1 tracking-widest">
+                Email Corporativo
+              </label>
               <div className="relative">
                 <Mail className="absolute left-4 top-4 text-gray-700" size={18} />
                 <input 
@@ -64,7 +70,9 @@ const Login = () => {
             </div>
 
             <div>
-              <label className="block text-[10px] uppercase font-bold text-gray-600 mb-2 ml-1 tracking-widest">Contraseña</label>
+              <label className="block text-[10px] uppercase font-bold text-gray-600 mb-2 ml-1 tracking-widest">
+                Contraseña
+              </label>
               <div className="relative">
                 <Key className="absolute left-4 top-4 text-gray-700" size={18} />
                 <input 
