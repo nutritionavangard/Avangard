@@ -1,16 +1,18 @@
 import axios from 'axios';
 
 const API = axios.create({
-    // Aseguramos que apunte a la URL unificada de Avangard
-    baseURL: 'https://avangard-nutrition.onrender.com/api',
-    timeout: 50000, // 50 segundos para despertar al servidor de Render
+    // CAMBIO CRÍTICO: Usamos la URL donde el diagnóstico confirmó que están los datos
+    baseURL: 'https://avangard-mdpp.onrender.com/api',
+    timeout: 50000, // 50 segundos para que Render "despierte"
 });
 
 // INTERCEPTOR DE PETICIÓN: Pega el token automáticamente
 API.interceptors.request.use((config) => {
     try {
         const storedUser = localStorage.getItem('userInfo');
-        if (storedUser && storedUser !== "undefined") {
+        
+        // Verificamos que exista y que no sea un string "undefined" accidental
+        if (storedUser && storedUser !== "undefined" && storedUser !== "null") {
             const userData = JSON.parse(storedUser);
             if (userData && userData.token) {
                 config.headers.Authorization = `Bearer ${userData.token}`;
@@ -24,17 +26,17 @@ API.interceptors.request.use((config) => {
     return Promise.reject(error);
 });
 
-// INTERCEPTOR DE RESPUESTA: Manejo inteligente de errores
+// INTERCEPTOR DE RESPUESTA: Manejo de errores de conexión y sesión
 API.interceptors.response.use(
     (response) => response,
     (error) => {
         const { response, code } = error;
 
-        // 1. SESIÓN EXPIRADA (401 Real)
+        // 1. SESIÓN EXPIRADA O TOKEN INVÁLIDO (401)
         if (response && response.status === 401) {
-            // Solo limpiamos si no estamos ya en el login para evitar bucles
+            // Solo redirigir si no estamos ya en el login
             if (!window.location.pathname.includes('/login')) {
-                console.warn("Acceso denegado: Token inválido o expirado.");
+                console.warn("Sesión expirada. Limpiando datos y redirigiendo...");
                 localStorage.removeItem('userInfo');
                 window.location.href = '/login';
             }
@@ -42,8 +44,8 @@ API.interceptors.response.use(
 
         // 2. ERROR DE RED / SERVER DORMIDO (Timeout o Network Error)
         if (!response || code === 'ECONNABORTED') {
-            console.error("El servidor de Render está tardando en responder. No cerramos sesión.");
-            // No redirigimos, dejamos que el usuario reintente.
+            console.error("El servidor de Render (mdpp) no responde. Reintenta en unos segundos.");
+            // No redirigimos al login aquí para que el usuario no pierda lo que escribió
         }
 
         return Promise.reject(error);
