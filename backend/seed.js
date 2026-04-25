@@ -1,62 +1,64 @@
-require('dotenv').config();
 const mongoose = require('mongoose');
+const dotenv = require('dotenv');
 const Product = require('./models/Product');
 const Stock = require('./models/Stock');
-const connectDB = require('./config/db');
 
-const seedData = async () => {
-    try {
-        await connectDB();
+dotenv.config();
 
-        // 1. Limpiar datos existentes para evitar duplicados
-        await Product.deleteMany();
-        await Stock.deleteMany();
-        console.log('🗑️ Base de datos limpia');
+const products = [
+  {
+    name: "Suplemento Test Pro",
+    tagline: "ENERGÍA EXPLOSIVA",
+    desc: "Descripción de prueba para línea Professional",
+    line: "Professional",
+    price: 15000,
+    qty: 10,
+    color: "#2563eb"
+  },
+  {
+    name: "Suplemento Test Premium",
+    tagline: "MÁXIMO RENDIMIENTO",
+    desc: "Descripción de prueba para línea Premium",
+    line: "Premium",
+    price: 25000,
+    qty: 5,
+    color: "#D4AF37"
+  }
+];
 
-        // 2. Definir productos iniciales de Avangard
-        const productos = [
-            {
-                name: "Professional Elite",
-                description: "Suplemento de alta densidad energética para caballos en plena temporada de competencia.",
-                line: "Professional (Azul)",
-                price: 85000,
-                image: "/assets/bolsa-azul.png"
-            },
-            {
-                name: "Performance Elite",
-                description: "Equilibrio nutricional óptimo para entrenamiento y mantenimiento de condición corporal.",
-                line: "Performance (Verde)",
-                price: 72000,
-                image: "/assets/bolsa-verde.png"
-            }
-        ];
+const importData = async () => {
+  try {
+    await mongoose.connect(process.env.MONGO_URI);
+    
+    // Limpiamos por si quedó algo
+    await Product.deleteMany();
+    await Stock.deleteMany();
 
-        // 3. Insertar productos
-        const creados = await Product.insertMany(productos);
-        console.log('✅ Productos de Avangard creados');
-
-        // 4. Crear registro de stock inicial para cada producto
-        const stockInicial = creados.map(p => ({
-            product: p._id,
-            quantity: 100, // Empezamos con 100 bolsas de cada una
-            warehouse: "San Miguel",
-            movements: [{
-                type: 'Ingreso',
-                amount: 100,
-                note: 'Carga inicial del sistema',
-                user: 'Sistema'
-            }]
-        }));
-
-        await Stock.insertMany(stockInicial);
-        console.log('📦 Stock inicial cargado (100 unidades c/u)');
-
-        console.log('✨ Proceso de Seed finalizado con éxito');
-        process.exit();
-    } catch (error) {
-        console.error(`❌ Error en el seed: ${error.message}`);
-        process.exit(1);
+    for (let p of products) {
+      // 1. Creamos el producto
+      const createdProduct = await Product.create(p);
+      
+      // 2. Creamos su espejo en la tabla de Stock
+      await Stock.create({
+        product: createdProduct._id,
+        productName: createdProduct.name,
+        quantity: createdProduct.qty,
+        warehouse: 'San Miguel',
+        movements: [{
+          type: 'Ingreso',
+          amount: createdProduct.qty,
+          operator: 'Sistema',
+          note: 'Carga inicial por Seed'
+        }]
+      });
     }
+
+    console.log('✅ ¡Datos importados con éxito!');
+    process.exit();
+  } catch (error) {
+    console.error(`❌ Error: ${error.message}`);
+    process.exit(1);
+  }
 };
 
-seedData();
+importData();

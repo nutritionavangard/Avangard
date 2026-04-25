@@ -1,33 +1,47 @@
 const Stock = require('../models/Stock');
 const Product = require('../models/Product');
 
-// @desc    Ver estado actual del depósito (Con datos del producto vinculados)
-// @route   GET /api/stock
-exports.getStockStatus = async (req, res) => {
+// @desc    Obtener TODOS los movimientos para el panel lateral de Logística
+// @route   GET /api/products/movements (vía productRoutes)
+exports.getMovements = async (req, res) => {
     try {
-        // Traemos el stock y populamos la info del producto (precio, línea, etc.)
-        const stock = await Stock.find().populate('product');
-        res.json(stock);
+        const stocks = await Stock.find();
+        // Extraemos todos los movimientos de todos los productos y los aplanamos en una sola lista
+        let allMovements = [];
+        stocks.forEach(s => {
+            const productMovements = s.movements.map(m => ({
+                id: m._id,
+                product: s.productName,
+                type: m.type.toLowerCase() === 'ingreso' ? 'ingreso' : 'entrega',
+                qty: m.amount,
+                date: new Date(m.date).toLocaleString('es-AR'),
+                recipient: m.recipient || 'Depósito Central'
+            }));
+            allMovements = [...allMovements, ...productMovements];
+        });
+
+        // Ordenamos por fecha (más reciente primero)
+        allMovements.sort((a, b) => new Date(b.date) - new Date(a.date));
+        
+        res.json(allMovements.slice(0, 50)); // Enviamos los últimos 50 logs
     } catch (error) {
-        res.status(500).json({ message: 'Error al consultar stock' });
+        res.status(500).json({ message: 'Error al obtener historial global' });
     }
 };
 
-// @desc    Actualizar existencias (Ingreso/Egreso) con registro de destinatario
+// @desc    Actualizar existencias (Ingreso/Egreso)
 // @route   POST /api/stock/update
 exports.updateStock = async (req, res) => {
     const { productId, type, amount, note, operator, recipient } = req.body;
 
     try {
-        // 1. Buscamos el stock y el producto de forma simultánea
         let stock = await Stock.findOne({ product: productId });
         const productData = await Product.findById(productId);
 
         if (!productData) {
-            return res.status(404).json({ message: 'Producto no encontrado en la base de datos' });
+            return res.status(404).json({ message: 'Producto no encontrado' });
         }
 
-        // Si por alguna razón el producto existe pero no tiene registro de stock, lo creamos
         if (!stock) {
             stock = new Stock({ 
                 product: productId, 
@@ -38,58 +52,49 @@ exports.updateStock = async (req, res) => {
             });
         }
 
-        // 2. Lógica de cálculo (Ingreso o Egreso)
         const numericAmount = Number(amount);
         const actionType = type.toLowerCase();
 
         if (actionType === 'ingreso') {
             stock.quantity += numericAmount;
-        } else if (actionType === 'entrega' || actionType === 'egreso') {
+        } else {
             if (stock.quantity < numericAmount) {
-                return res.status(400).json({ message: 'Stock insuficiente para realizar la entrega' });
+                return res.status(400).json({ message: 'Stock insuficiente' });
             }
             stock.quantity -= numericAmount;
         }
 
-        // 3. Registro en historial de movimientos
+        // Registro en historial
         stock.movements.push({ 
-            type, 
+            type: actionType === 'ingreso' ? 'Ingreso' : 'Entrega', 
             amount: numericAmount, 
-            note, 
-            operator: operator || 'Admin', 
+            note: note || 'Actualización manual', 
+            operator: operator || (req.user ? req.user.name : 'Admin'), 
             recipient: recipient || 'Depósito Central',
             date: Date.now()
         });
         
-        // 4. GUARDADO SINCRONIZADO: Actualizamos el 'qty' en el modelo Product
-        // Esto es vital para que el Catálogo vea el cambio instantáneamente
+        // Sincronización con el modelo Product
         productData.qty = stock.quantity;
         
-        await Promise.all([
-            stock.save(),
-            productData.save()
-        ]);
+        await Promise.all([stock.save(), productData.save()]);
 
         res.status(200).json({
-            message: 'Movimiento registrado y catálogo actualizado',
+            message: 'Movimiento registrado',
             currentStock: stock.quantity,
             product: productData.name
         });
         
     } catch (error) {
-        console.error("Error en updateStock:", error);
-        res.status(400).json({ message: 'Error en la actualización de stock y sincronización' });
+        res.status(400).json({ message: 'Error en la sincronización' });
     }
 };
 
-// @desc    Obtener solo el historial de movimientos de un producto específico
-// @route   GET /api/stock/movements/:productId
+// @desc    Obtener historial de un producto específico
 exports.getMovementsByProduct = async (req, res) => {
     try {
         const stock = await Stock.findOne({ product: req.params.productId });
-        if (!stock) {
-            return res.status(404).json({ message: 'Historial no encontrado' });
-        }
+        if (!stock) return res.status(404).json({ message: 'Sin historial' });
         res.json(stock.movements);
     } catch (error) {
         res.status(500).json({ message: 'Error al obtener movimientos' });
