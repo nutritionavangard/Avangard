@@ -10,27 +10,14 @@ const app = express();
 connectDB();
 
 // 2. Middlewares Globales
-// Configuración de CORS blindada
-const allowedOrigins = [
-  'https://avangard-nutrition.onrender.com', // Tu sitio estático
-  'http://localhost:5173',                   // Vite local
-  'http://localhost:3000'                    // Alternativo local
-];
-
+// Simplificamos el CORS para evitar bloqueos por dominios mal escritos
 app.use(cors({
-  origin: function (origin, callback) {
-    // Permitir peticiones sin origen (como apps móviles o curl)
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) === -1) {
-      const msg = 'El protocolo CORS de Avangard no permite acceso desde este origen.';
-      return callback(new Error(msg), false);
-    }
-    return callback(null, true);
-  },
-  credentials: true
+    origin: '*', // Permite peticiones desde cualquier lugar (Ideal para pruebas en iPad)
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-// Aumentamos el límite de tamaño de JSON
+// Aumentamos el límite de tamaño para fotos de productos
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
@@ -56,7 +43,6 @@ app.use((err, req, res, next) => {
     });
 });
 
-// IMPORTANTE: En Render, process.env.PORT es dinámico, no siempre es 5000 o 10000.
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Avangard Server funcionando en puerto ${PORT}`);
