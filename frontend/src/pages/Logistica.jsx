@@ -4,12 +4,9 @@ import {
   PackagePlus, PackageMinus, History, X, ClipboardList, 
   Edit3, AlertCircle, PlusCircle, RefreshCw 
 } from 'lucide-react';
-// IMPORTANTE: Usamos nuestra instancia configurada, no axios pelado
 import API from '../services/api'; 
 
 const Logistica = () => {
-  // Eliminamos la URL hardcodeada de aquí porque ya está en services/api.js
-
   const CATALOGO_PRODUCTOS = [
     "BAL POLO", "BAL PSC", "BAL Yeguas Reproductoras", "BAL Potrillos",
     "BAL Equitacion", "Conc. Prot. Vigor. Equino", "BAL Mantenimiento",
@@ -38,21 +35,23 @@ const Logistica = () => {
 
   const fetchProducts = async () => {
     try {
-      setLoading(true);
+      // No reseteamos loading a true aquí para evitar parpadeos en cada recarga
       setErrorStatus(null);
-      // Usamos API.get. La URL base ya es /api
       const response = await API.get('/products');
       setStock(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
       console.error("Error de conexión:", error);
       setErrorStatus("Sincronizando con la terminal...");
-      setTimeout(fetchProducts, 8000);
+      // Reintento automático más corto para mejorar la experiencia
+      setTimeout(fetchProducts, 5000);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => { fetchProducts(); }, []);
+  useEffect(() => { 
+    fetchProducts(); 
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('logistica_logs', JSON.stringify(logs));
@@ -62,26 +61,24 @@ const Logistica = () => {
     e.preventDefault();
     setIsSubmitting(true);
     
-    // Ya no necesitamos sacar el token a mano, lo hace el interceptor de API
-
     try {
       let response;
       if (modalType === 'nuevo') {
         response = await API.post('/products', {
           name: transaction.name, 
-          qty: parseInt(transaction.qty),
+          qty: Number(transaction.qty), // Forzamos número
           line: transaction.line, 
-          price: parseFloat(transaction.newPrice),
+          price: Number(transaction.newPrice),
           color: '#D4AF37'
         });
       } else if (modalType === 'precio') {
         response = await API.put(`/stock/price/${selectedProduct._id}`, 
-          { price: parseFloat(transaction.newPrice) });
+          { price: Number(transaction.newPrice) });
       } else {
         response = await API.post('/stock/update', { 
           productId: selectedProduct._id,
           type: modalType === 'ingreso' ? 'Ingreso' : 'Egreso',
-          amount: parseInt(transaction.qty),
+          amount: Number(transaction.qty),
           recipient: transaction.recipient || 'Depósito Central'
         });
       }
@@ -92,27 +89,27 @@ const Logistica = () => {
         date: new Date().toLocaleString('es-AR'),
         product: modalType === 'nuevo' ? transaction.name : selectedProduct.name,
         type: modalType === 'nuevo' ? 'ingreso' : modalType,
-        qty: parseInt(transaction.qty),
+        qty: Number(transaction.qty),
         recipient: transaction.recipient || 'Depósito Central',
       };
       
       if (modalType !== 'precio') setLogs(prev => [newLog, ...prev]);
 
+      // Refrescamos datos
       await fetchProducts();
       setIsModalOpen(false);
+      // Reset de formulario
       setTransaction({ qty: '', recipient: '', newPrice: '', name: CATALOGO_PRODUCTOS[0], line: 'Professional' });
 
     } catch (error) {
-      // El interceptor de API ya maneja el 401 (logout),
-      // aquí solo manejamos errores visuales de la operación
       console.error("Error en operación:", error);
-      alert(error.response?.data?.message || "Error de red. El servidor está tardando.");
+      const msg = error.response?.data?.message || "Error de red. Verifica tu conexión.";
+      alert(msg);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // ... (Resto del renderizado igual al tuyo)
   if (loading && stock.length === 0) return (
     <div className="min-h-screen bg-black flex flex-col items-center justify-center text-[#D4AF37]">
       <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-[#D4AF37] mb-4"></div>
@@ -202,7 +199,7 @@ const Logistica = () => {
                   <p className="text-[8px] text-gray-600 font-mono">{log.date}</p>
                   <p className="text-[10px] font-black uppercase italic">{log.product}</p>
                   <div className="flex justify-between mt-1 text-[10px] font-mono">
-                    <span className="text-gray-500">@{log.recipient}</span>
+                    <span className="text-gray-500 text-[9px]">@{log.recipient}</span>
                     <span className={log.type === 'ingreso' ? 'text-green-500' : 'text-red-500'}>{log.type === 'ingreso' ? '+' : '-'}{log.qty}</span>
                   </div>
                 </div>
@@ -249,7 +246,7 @@ const Logistica = () => {
                       </div>
                     </div>
                     <div>
-                      <label className="text-[10px] uppercase font-black text-gray-600 mb-2 block">Stock que Ingresa</label>
+                      <label className="text-[10px] uppercase font-black text-gray-600 mb-2 block">Stock Inicial</label>
                       <input type="number" required className="w-full bg-black border border-gray-800 p-4 rounded-xl font-mono text-2xl text-center"
                         value={transaction.qty} onChange={(e) => setTransaction({...transaction, qty: e.target.value})} />
                     </div>
@@ -257,7 +254,7 @@ const Logistica = () => {
                 ) : (
                   <div className="space-y-4">
                     <div className="bg-black/50 p-4 rounded-xl border border-gray-900 text-center">
-                      <p className="text-[10px] text-gray-600 uppercase font-black">Producto Seleccionado</p>
+                      <p className="text-[10px] text-gray-600 uppercase font-black">Producto</p>
                       <p className="text-xl font-black text-[#D4AF37] italic uppercase">{selectedProduct?.name}</p>
                     </div>
                     {modalType === 'precio' ? (
@@ -267,15 +264,15 @@ const Logistica = () => {
                       <div className="grid grid-cols-2 gap-4">
                         <input type="number" placeholder="Cant." required className="w-full bg-black border border-gray-800 p-4 rounded-xl font-mono text-2xl text-center"
                           value={transaction.qty} onChange={(e) => setTransaction({...transaction, qty: e.target.value})} autoFocus />
-                        <input type="text" placeholder="Origen/Dest." required className="w-full bg-black border border-gray-800 p-4 rounded-xl uppercase text-[10px] font-black"
+                        <input type="text" placeholder="Origen/Destino" required className="w-full bg-black border border-gray-800 p-4 rounded-xl uppercase text-[10px] font-black"
                           value={transaction.recipient} onChange={(e) => setTransaction({...transaction, recipient: e.target.value})} />
                       </div>
                     )}
                   </div>
                 )}
 
-                <button disabled={isSubmitting} className="w-full bg-white text-black font-black py-5 uppercase tracking-widest rounded-2xl hover:bg-[#D4AF37] hover:text-white transition-all italic shadow-xl">
-                  {isSubmitting ? "Sincronizando..." : "Confirmar Operación"}
+                <button disabled={isSubmitting} className="w-full bg-white text-black font-black py-5 uppercase tracking-widest rounded-2xl hover:bg-[#D4AF37] hover:text-white transition-all italic shadow-xl disabled:opacity-50">
+                  {isSubmitting ? "Procesando..." : "Confirmar Operación"}
                 </button>
               </form>
             </motion.div>

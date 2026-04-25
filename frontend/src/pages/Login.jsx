@@ -14,8 +14,14 @@ const Login = () => {
     e.preventDefault();
     
     try {
-      // Dejamos que el AuthContext y el Backend manejen la validación.
-      // Esto asegura que el token se guarde correctamente en el localStorage como 'userInfo'.
+      /**
+       * LIMPIEZA PREVENTIVA:
+       * Al cambiar de servidor (de nutrition a mdpp), eliminamos cualquier
+       * rastro de userInfo anterior para evitar conflictos de tokens.
+       */
+      localStorage.removeItem('userInfo');
+      
+      // Intentamos el login con el nuevo script de Admin que pusimos en el servidor
       await login(email, password);
       
       // Si el login es exitoso, navegamos a logística.
@@ -24,6 +30,7 @@ const Login = () => {
       console.error("Error en login:", error);
       
       // Si el backend responde con error (401), mostramos el mensaje real del servidor.
+      // Esto nos dirá si es "Usuario no encontrado" o "Contraseña incorrecta".
       const errorMsg = error.response?.data?.message || "Error al conectar con el servidor.";
       alert(errorMsg);
     }
