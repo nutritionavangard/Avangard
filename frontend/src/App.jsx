@@ -1,6 +1,7 @@
-import React, { useEffect } from 'react';
-import { Routes, Route, useLocation } from 'react-router-dom';
+import React, { useEffect, useContext } from 'react'; // Agregamos useContext
+import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
+import { AuthContext } from './context/AuthContext'; // Importamos el contexto
 
 // Componentes
 import Navbar from './components/Navbar';
@@ -14,16 +15,30 @@ import Logistica from './pages/Logistica';
 import Login from './pages/Login';
 import DetalleProducto from './pages/DetalleProducto';
 
+// --- COMPONENTE DE PROTECCIÓN ---
+const ProtectedRoute = ({ children }) => {
+  const { user, loading } = useContext(AuthContext);
+
+  if (loading) return null; // Esperamos a que el sistema lea el localStorage
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return children;
+};
+
 function App() {
   const location = useLocation();
 
-  // Sistema de Keep-Alive para evitar que Render se duerma (Plan Free)
-  // IMPORTANTE: Apuntamos al backend para que la base de datos esté siempre lista
+  // Sistema de Keep-Alive Corregido
   useEffect(() => {
+    const backendURL = 'https://avangard-nutrition.onrender.com/api/products';
+    
     const interval = setInterval(() => {
-      fetch('http://localhost:5000/api/products') // Cambia a tu URL de Render cuando hagas deploy
-        .then(() => console.log('Ping de actividad enviado al Backend.'))
-        .catch(err => console.log('Error en ping:', err));
+      fetch(backendURL)
+        .then(() => console.log('Ping de actividad enviado al Backend en Render.'))
+        .catch(err => console.log('Error en ping (normal si el server duerme):', err));
     }, 600000); // 10 minutos
     
     return () => clearInterval(interval);
@@ -31,61 +46,31 @@ function App() {
 
   return (
     <div className="min-h-screen bg-[#050505]">
-      {/* El Navbar queda fijo fuera de las rutas para consistencia */}
       <Navbar />
       
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
-          <Route 
-            path="/" 
-            element={
-              <Layout>
-                <Home />
-              </Layout>
-            } 
-          />
-          <Route 
-            path="/catalogo" 
-            element={
-              <Layout>
-                <Catalogo />
-              </Layout>
-            } 
-          />
-          {/* Ruta dinámica para ver el detalle de cada producto */}
-          <Route 
-            path="/producto/:id" 
-            element={
-              <Layout>
-                <DetalleProducto />
-              </Layout>
-            } 
-          />
-          <Route 
-            path="/contacto" 
-            element={
-              <Layout>
-                <Contacto />
-              </Layout>
-            } 
-          />
-          {/* Panel de administración de stock y precios */}
+          <Route path="/" element={<Layout><Home /></Layout>} />
+          <Route path="/catalogo" element={<Layout><Catalogo /></Layout>} />
+          <Route path="/producto/:id" element={<Layout><DetalleProducto /></Layout>} />
+          <Route path="/contacto" element={<Layout><Contacto /></Layout>} />
+          
+          {/* PANEL DE LOGÍSTICA PROTEGIDO */}
           <Route 
             path="/logistica" 
             element={
-              <Layout>
-                <Logistica />
-              </Layout>
+              <ProtectedRoute>
+                <Layout>
+                  <Logistica />
+                </Layout>
+              </ProtectedRoute>
             } 
           />
-          <Route 
-            path="/login" 
-            element={
-              <Layout>
-                <Login />
-              </Layout>
-            } 
-          />
+
+          <Route path="/login" element={<Layout><Login /></Layout>} />
+          
+          {/* Redirección por defecto si alguien escribe cualquier cosa */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AnimatePresence>
     </div>
