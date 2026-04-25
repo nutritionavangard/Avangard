@@ -1,33 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  PackagePlus, 
-  PackageMinus, 
-  History, 
-  X, 
-  ClipboardList, 
-  Edit3, 
-  AlertCircle,
-  PlusCircle
+  PackagePlus, PackageMinus, History, X, ClipboardList, 
+  Edit3, AlertCircle, PlusCircle, RefreshCw 
 } from 'lucide-react';
 import axios from 'axios';
 
 const Logistica = () => {
-  // Priorizamos la URL de producción para evitar errores de localhost en dispositivos externos
+  // Hardcode de la URL para evitar conflictos de variables de entorno
   const API_URL = 'https://avangard-mdpp.onrender.com';
 
   const CATALOGO_PRODUCTOS = [
-    "BAL POLO",
-    "BAL PSC",
-    "BAL Yeguas Reproductoras",
-    "BAL Potrillos",
-    "BAL Equitacion",
-    "Conc. Prot. Vigor. Equino",
-    "BAL Mantenimiento",
-    "BAL Deporte",
-    "Cubos de Alfalfa",
-    "Palet de Alfalfa",
-    "Avena"
+    "BAL POLO", "BAL PSC", "BAL Yeguas Reproductoras", "BAL Potrillos",
+    "BAL Equitacion", "Conc. Prot. Vigor. Equino", "BAL Mantenimiento",
+    "BAL Deporte", "Cubos de Alfalfa", "Palet de Alfalfa", "Avena"
   ];
 
   const [stock, setStock] = useState([]);
@@ -42,11 +28,8 @@ const Logistica = () => {
   const [modalType, setModalType] = useState('ingreso'); 
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [transaction, setTransaction] = useState({ 
-    qty: '', 
-    recipient: '', 
-    newPrice: '',
-    name: CATALOGO_PRODUCTOS[0],
-    line: 'Professional'
+    qty: '', recipient: '', newPrice: '', 
+    name: CATALOGO_PRODUCTOS[0], line: 'Professional' 
   });
   
   const [loading, setLoading] = useState(true);
@@ -57,14 +40,14 @@ const Logistica = () => {
     try {
       setLoading(true);
       setErrorStatus(null);
-      // Timeout extendido para dar tiempo a Render a "despertar"
-      const response = await axios.get(`${API_URL}/api/products`, { timeout: 30000 });
+      // Aumentamos el timeout porque Render Free es lento para arrancar
+      const response = await axios.get(`${API_URL}/api/products`, { timeout: 40000 });
       setStock(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
-      console.error("Fetch error:", error);
-      setErrorStatus("El servidor está iniciando o la conexión es inestable. Reintentando...");
-      // Reintento automático en 5 segundos
-      setTimeout(fetchProducts, 5000);
+      console.error("Error de conexión:", error);
+      setErrorStatus("Sincronizando con la terminal... El servidor está tardando en responder.");
+      // Reintento automático más suave
+      setTimeout(fetchProducts, 8000);
     } finally {
       setLoading(false);
     }
@@ -83,29 +66,32 @@ const Logistica = () => {
     let token = null;
     try {
       const userInfo = localStorage.getItem('userInfo');
-      if (userInfo && userInfo !== "undefined") {
+      if (userInfo) {
         token = JSON.parse(userInfo).token;
       }
     } catch (e) { console.error("Error sesión"); }
 
     const config = {
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }
+      headers: { 
+        'Content-Type': 'application/json', 
+        'Authorization': `Bearer ${token}` 
+      },
+      timeout: 45000 // Tiempo extra para operaciones de escritura
     };
 
     try {
+      let response;
       if (modalType === 'nuevo') {
-        await axios.post(`${API_URL}/api/products`, {
-          name: transaction.name,
-          qty: parseInt(transaction.qty),
-          line: transaction.line,
-          price: parseFloat(transaction.newPrice),
+        response = await axios.post(`${API_URL}/api/products`, {
+          name: transaction.name, qty: parseInt(transaction.qty),
+          line: transaction.line, price: parseFloat(transaction.newPrice),
           color: '#D4AF37'
         }, config);
       } else if (modalType === 'precio') {
-        await axios.put(`${API_URL}/api/stock/price/${selectedProduct._id}`, 
+        response = await axios.put(`${API_URL}/api/stock/price/${selectedProduct._id}`, 
           { price: parseFloat(transaction.newPrice) }, config);
       } else {
-        await axios.post(`${API_URL}/api/stock/update`, { 
+        response = await axios.post(`${API_URL}/api/stock/update`, { 
           productId: selectedProduct._id,
           type: modalType === 'ingreso' ? 'Ingreso' : 'Egreso',
           amount: parseInt(transaction.qty),
@@ -113,29 +99,30 @@ const Logistica = () => {
         }, config);
       }
 
-      // Logica de logs locales
-      if (modalType !== 'precio') {
-        const newLog = {
-          id: Date.now(),
-          date: new Date().toLocaleString('es-AR'),
-          product: modalType === 'nuevo' ? transaction.name : selectedProduct.name,
-          type: modalType === 'nuevo' ? 'ingreso' : modalType,
-          qty: parseInt(transaction.qty),
-          recipient: transaction.recipient || 'Depósito Central',
-        };
-        setLogs(prev => [newLog, ...prev]);
-      }
+      // Si llegamos aquí, la operación fue exitosa
+      const newLog = {
+        id: Date.now(),
+        date: new Date().toLocaleString('es-AR'),
+        product: modalType === 'nuevo' ? transaction.name : selectedProduct.name,
+        type: modalType === 'nuevo' ? 'ingreso' : modalType,
+        qty: parseInt(transaction.qty),
+        recipient: transaction.recipient || 'Depósito Central',
+      };
+      
+      if (modalType !== 'precio') setLogs(prev => [newLog, ...prev]);
 
       await fetchProducts();
       setIsModalOpen(false);
       setTransaction({ qty: '', recipient: '', newPrice: '', name: CATALOGO_PRODUCTOS[0], line: 'Professional' });
 
     } catch (error) {
+      // SOLO cerramos sesión si el error es explícitamente 401. 
+      // Si el error es de conexión (Network Error / Timeout), avisamos pero NO echamos al usuario.
       if (error.response?.status === 401) {
-        alert("Sesión expirada. Por favor, reingresá.");
+        alert("La sesión expiró realmente. Por favor reingresá.");
         window.location.href = '/login';
       } else {
-        alert(error.response?.data?.message || "Error de conexión con la terminal.");
+        alert("Error de red: El servidor de Render cerró la conexión. Intentá confirmar nuevamente en unos segundos.");
       }
     } finally {
       setIsSubmitting(false);
@@ -145,15 +132,15 @@ const Logistica = () => {
   if (loading && stock.length === 0) return (
     <div className="min-h-screen bg-black flex flex-col items-center justify-center text-[#D4AF37]">
       <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-[#D4AF37] mb-4"></div>
-      <p className="font-black italic uppercase tracking-widest text-[10px]">Sincronizando con Servidor...</p>
+      <p className="font-black italic uppercase tracking-widest text-[10px]">Cargando Sistema...</p>
     </div>
   );
 
   return (
-    <div className="bg-[#050505] min-h-screen p-4 md:p-8 text-white pt-28 font-sans relative">
+    <div className="bg-[#050505] min-h-screen p-4 md:p-8 text-white pt-28 font-sans relative overflow-x-hidden">
       <div className="max-w-6xl mx-auto relative z-10">
         <header className="flex flex-col md:flex-row justify-between items-start md:items-end mb-16 gap-6">
-          <div className="relative z-20">
+          <div>
             <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tighter leading-[0.9]">
               Gestión de <br /><span className="text-[#D4AF37]">Stock</span>
             </h1>
@@ -176,13 +163,12 @@ const Logistica = () => {
 
         {errorStatus && (
           <div className="bg-amber-950/20 border border-amber-900 text-amber-500 p-4 rounded-xl mb-8 flex items-center gap-3 animate-pulse">
-            <AlertCircle size={20} />
+            <RefreshCw size={18} className="animate-spin" />
             <p className="text-[10px] font-black uppercase tracking-widest">{errorStatus}</p>
           </div>
         )}
 
         <div className="grid lg:grid-cols-3 gap-8">
-          {/* Listado de Productos */}
           <div className="lg:col-span-2 space-y-4">
             <h2 className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.4em] text-gray-500 mb-2">
               <ClipboardList size={14} /> Ítems en Depósito ({stock.length})
@@ -219,7 +205,6 @@ const Logistica = () => {
             ))}
           </div>
 
-          {/* Historial Lateral */}
           <div className="bg-[#080808] rounded-3xl border border-gray-900 p-6 h-[600px] flex flex-col sticky top-24">
             <h2 className="flex items-center justify-between text-[10px] font-black uppercase tracking-[0.3em] text-[#D4AF37] mb-8">
               <span className="flex items-center gap-2"><History size={14} /> Historial</span>
@@ -243,7 +228,6 @@ const Logistica = () => {
         </div>
       </div>
 
-      {/* Modal Unificado */}
       <AnimatePresence>
         {isModalOpen && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/95 backdrop-blur-sm">
@@ -306,7 +290,7 @@ const Logistica = () => {
                   </div>
                 )}
 
-                <button disabled={isSubmitting} className="w-full bg-white text-black font-black py-5 uppercase tracking-widest rounded-2xl hover:bg-[#D4AF37] hover:text-white transition-all italic">
+                <button disabled={isSubmitting} className="w-full bg-white text-black font-black py-5 uppercase tracking-widest rounded-2xl hover:bg-[#D4AF37] hover:text-white transition-all italic shadow-xl">
                   {isSubmitting ? "Sincronizando..." : "Confirmar Operación"}
                 </button>
               </form>
