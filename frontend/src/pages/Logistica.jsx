@@ -16,8 +16,8 @@ import {
 import axios from 'axios';
 
 const Logistica = () => {
-  // Configuración de API (Render usa variables de entorno, local usa localhost)
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+  // CONFIGURACIÓN CRÍTICA: Prioriza la variable de entorno, pero usa tu URL de Render real por defecto
+  const API_URL = import.meta.env.VITE_API_URL || 'https://avangard-mdpp.onrender.com';
 
   // 1. Estados principales
   const [stock, setStock] = useState([]);
@@ -94,7 +94,6 @@ const Logistica = () => {
     try {
       let data;
       if (modalType === 'precio') {
-        // Ruta de actualización de precio
         const res = await axios.put(
           `${API_URL}/api/stock/price/${selectedProduct._id}`, 
           { price: parseFloat(transaction.newPrice) }, 
@@ -102,7 +101,6 @@ const Logistica = () => {
         );
         data = res.data;
       } else {
-        // Ruta de movimiento de stock
         const res = await axios.post(
           `${API_URL}/api/stock/update`, 
           { 
@@ -113,8 +111,6 @@ const Logistica = () => {
           }, 
           config
         );
-        // El endpoint de stock devuelve el producto actualizado o el mensaje
-        // Refrescamos la lista completa para asegurar sincronía total
         await fetchProducts();
       }
 
@@ -129,7 +125,6 @@ const Logistica = () => {
         };
         setLogs(prev => [newLog, ...prev]);
       } else {
-         // Si fue precio, actualizamos localmente el item
          setStock(prev => prev.map(item => item._id === data._id ? data : item));
       }
 
