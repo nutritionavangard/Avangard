@@ -2,7 +2,8 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path'); 
-const mongoose = require('mongoose'); // Importante para el diagnóstico
+const mongoose = require('mongoose');
+const fs = require('fs'); // Añadido para verificar carpetas
 const connectDB = require('./config/db');
 
 const app = express();
@@ -23,7 +24,7 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 // 3. Servir imágenes estáticas
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// --- RUTA DE DIAGNÓSTICO (Para verificar la base de datos) ---
+// --- RUTA DE DIAGNÓSTICO ---
 app.get('/api/test-db', async (req, res) => {
     try {
         const dbStatus = mongoose.connection.readyState;
@@ -34,7 +35,6 @@ app.get('/api/test-db', async (req, res) => {
             3: "Desconectando"
         };
 
-        // Intentamos listar las colecciones reales en Atlas
         const collections = await mongoose.connection.db.listCollections().toArray();
         
         res.json({
@@ -42,13 +42,13 @@ app.get('/api/test-db', async (req, res) => {
             databaseName: mongoose.connection.name,
             collections: collections.map(c => c.name),
             env: process.env.NODE_ENV,
-            msg: "Si ves colecciones aquí, la conexión es exitosa."
+            msg: "Si ves colecciones aquí, la conexión es exitosa.",
+            checkPath: path.join(__dirname, 'dist') // Para ver dónde busca el servidor
         });
     } catch (err) {
         res.status(500).json({
             status: "Error de diagnóstico",
-            error: err.message,
-            stack: err.stack
+            error: err.message
         });
     }
 });
@@ -58,14 +58,20 @@ app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/products', require('./routes/productRoutes'));
 app.use('/api/stock', require('./routes/stockRoutes'));
 
-// --- 5. CONFIGURACIÓN PARA RENDER (Frontend + Backend unificados) ---
-if (process.env.NODE_ENV === 'production' || true) {
-    const frontendPath = path.join(__dirname, 'dist'); 
-    app.use(express.static(frontendPath));
+// --- 5. CONFIGURACIÓN PARA RENDER (CON VERIFICACIÓN DE CARPETA) ---
+const frontendPath = path.join(__dirname, 'dist'); 
 
-    // Regex para no pisar las rutas de la API
+if (fs.existsSync(frontendPath)) {
+    // Si la carpeta existe, servimos el frontend normalmente
+    app.use(express.static(frontendPath));
     app.get(/^\/(?!api).*/, (req, res) => {
         res.sendFile(path.join(frontendPath, 'index.html'));
+    });
+} else {
+    // Si la carpeta NO existe (lo que causaba el error ENOENT), evitamos el crash
+    console.warn("⚠️ ADVERTENCIA: La carpeta 'dist' no fue encontrada en: " + frontendPath);
+    app.get('/', (req, res) => {
+        res.send('Servidor Avangard Activo. La API funciona, pero el Frontend no fue compilado correctamente en esta ruta.');
     });
 }
 
