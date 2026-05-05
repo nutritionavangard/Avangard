@@ -25,7 +25,6 @@ const Logistica = () => {
   const [modalType, setModalType] = useState('ingreso'); 
   const [selectedProduct, setSelectedProduct] = useState(null);
   
-  // Estado inicial ajustado a tu esquema de MongoDB
   const [transaction, setTransaction] = useState({ 
     qty: '', 
     recipient: '', 
@@ -69,7 +68,7 @@ const Logistica = () => {
     try {
       let response;
       if (modalType === 'nuevo') {
-        // Enviamos TODOS los campos del esquema de tu imagen
+        // Estructura exacta según tu JSON de base de datos
         response = await API.post('/products', {
           name: transaction.name, 
           tagline: transaction.tagline,
@@ -82,9 +81,11 @@ const Logistica = () => {
           active: true
         });
       } else if (modalType === 'precio') {
-        // Actualizamos manteniendo la integridad del esquema
-        response = await API.put(`/products/${selectedProduct._id}`, {
-          ...selectedProduct,
+        // LIMPIEZA CRÍTICA: Extraemos _id y __v para no enviarlos en el body
+        const { _id, __v, ...datosLimpios } = selectedProduct;
+        
+        response = await API.put(`/products/${_id}`, {
+          ...datosLimpios,
           price: Number(transaction.newPrice) 
         });
       } else {
@@ -96,7 +97,6 @@ const Logistica = () => {
         });
       }
 
-      // Registro de Logs Local
       const newLog = {
         id: Date.now(),
         date: new Date().toLocaleString('es-AR'),
@@ -111,7 +111,6 @@ const Logistica = () => {
       await fetchProducts();
       setIsModalOpen(false);
       
-      // Reset con valores por defecto del esquema
       setTransaction({ 
         qty: '', recipient: '', newPrice: '', 
         name: CATALOGO_PRODUCTOS[0], line: 'Premium', 
@@ -120,14 +119,11 @@ const Logistica = () => {
 
     } catch (error) {
       console.error("Error detallado:", error.response?.data);
-      alert(`Error del Servidor: ${error.response?.data?.message || "Revisa los campos obligatorios"}`);
+      alert(`Error: ${error.response?.data?.message || "Error de validación de esquema"}`);
     } finally {
       setIsSubmitting(false);
     }
   };
-
-  // ... (El resto del renderizado es idéntico al anterior, pero ahora es compatible con tu BD)
-  // [CÓDIGO DE RENDERIZADO OMITIDO POR BREVEDAD, SE MANTIENE EL MISMO ESTILO VISUAL]
 
   if (loading && stock.length === 0) return (
     <div className="min-h-screen bg-black flex flex-col items-center justify-center text-[#D4AF37]">
@@ -205,6 +201,7 @@ const Logistica = () => {
             ))}
           </div>
 
+          {/* Historial Lateral */}
           <div className="bg-[#080808] rounded-3xl border border-gray-900 p-6 h-[600px] flex flex-col sticky top-24">
             <h2 className="flex items-center justify-between text-[10px] font-black uppercase tracking-[0.3em] text-[#D4AF37] mb-8">
               <span className="flex items-center gap-2"><History size={14} /> Historial</span>
