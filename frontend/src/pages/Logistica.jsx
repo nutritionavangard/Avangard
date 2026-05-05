@@ -2,12 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   PackagePlus, PackageMinus, History, X, ClipboardList, 
-  Edit3, AlertCircle, PlusCircle, RefreshCw 
+  Edit3, PlusCircle, RefreshCw 
 } from 'lucide-react';
 import API from '../services/api'; 
 
 const Logistica = () => {
-  // Catálogo basado en tus productos reales
   const CATALOGO_PRODUCTOS = [
     "BAL POLO", "BAL PSC", "BAL Yeguas Reproductoras", "BAL Potrillos",
     "BAL Equitacion", "Conc. Prot. Vigor. Equino", "BAL Mantenimiento",
@@ -26,16 +25,16 @@ const Logistica = () => {
   const [modalType, setModalType] = useState('ingreso'); 
   const [selectedProduct, setSelectedProduct] = useState(null);
   
-  // Estado inicial ajustado estrictamente a tu Schema
+  // Estado inicial limpio (desc ya no es prioritario)
   const [transaction, setTransaction] = useState({ 
     qty: '', 
     recipient: '', 
     newPrice: '', 
     name: CATALOGO_PRODUCTOS[0], 
-    line: 'Premium', // Debe ser 'Premium' o 'Professional'
+    line: 'Premium', 
     tagline: 'MÁXIMO RENDIMIENTO',
     category: 'Equine',
-    desc: 'Producto de alta calidad para nutrición equina.' // Agregado para cumplir con required:true
+    desc: '' 
   });
   
   const [loading, setLoading] = useState(true);
@@ -71,23 +70,21 @@ const Logistica = () => {
     try {
       let response;
       if (modalType === 'nuevo') {
-        // Enviamos exactamente lo que el productSchema requiere
         response = await API.post('/products', {
           name: transaction.name, 
           tagline: transaction.tagline,
-          desc: transaction.desc, // Obligatorio según tu Schema
-          line: transaction.line, // Validado por Enum
+          desc: transaction.desc || "", // Enviamos vacío si no hay nada
+          line: transaction.line, 
           price: Number(transaction.newPrice),
           category: transaction.category,
           qty: Number(transaction.qty), 
           color: transaction.line === 'Premium' ? '#D4AF37' : '#2563eb'
         });
       } else if (modalType === 'precio') {
-        // Construcción limpia del objeto para actualización
         const payload = {
           name: selectedProduct.name,
           tagline: selectedProduct.tagline || 'MÁXIMO RENDIMIENTO',
-          desc: selectedProduct.desc || 'Producto de alta calidad para nutrición equina.',
+          desc: selectedProduct.desc || "", // Sin obligación de contenido
           line: selectedProduct.line,
           price: Number(transaction.newPrice),
           category: selectedProduct.category || "Equine",
@@ -97,7 +94,6 @@ const Logistica = () => {
 
         response = await API.put(`/products/${selectedProduct._id}`, payload);
       } else {
-        // Movimientos de Stock
         response = await API.post('/stock/update', { 
           productId: selectedProduct._id,
           type: modalType === 'ingreso' ? 'Ingreso' : 'Egreso',
@@ -120,17 +116,16 @@ const Logistica = () => {
       await fetchProducts();
       setIsModalOpen(false);
       
-      // Reset a valores válidos
       setTransaction({ 
         qty: '', recipient: '', newPrice: '', 
         name: CATALOGO_PRODUCTOS[0], line: 'Premium', 
         tagline: 'MÁXIMO RENDIMIENTO', category: 'Equine',
-        desc: 'Producto de alta calidad para nutrición equina.'
+        desc: ''
       });
 
     } catch (error) {
       console.error("Error del servidor:", error.response?.data);
-      alert(`Error de Validación: ${error.response?.data?.message || "Verifica los campos obligatorios (desc, line, price)"}`);
+      alert(`Error: ${error.response?.data?.message || "Error al procesar la operación"}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -159,7 +154,7 @@ const Logistica = () => {
           <button 
             onClick={() => { 
               setModalType('nuevo'); 
-              setTransaction({ ...transaction, qty: '', newPrice: '' });
+              setTransaction({ ...transaction, qty: '', newPrice: '', desc: '' });
               setIsModalOpen(true); 
             }}
             className="bg-white text-black px-8 py-4 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-[#D4AF37] hover:text-white transition-all flex items-center gap-3 italic shadow-xl"
@@ -212,7 +207,6 @@ const Logistica = () => {
             ))}
           </div>
 
-          {/* Historial */}
           <div className="bg-[#080808] rounded-3xl border border-gray-900 p-6 h-[600px] flex flex-col sticky top-24">
             <h2 className="flex items-center justify-between text-[10px] font-black uppercase tracking-[0.3em] text-[#D4AF37] mb-8">
               <span className="flex items-center gap-2"><History size={14} /> Historial</span>
@@ -258,7 +252,7 @@ const Logistica = () => {
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="text-[10px] uppercase font-black text-gray-600 mb-2 block">Línea (Enum)</label>
+                        <label className="text-[10px] uppercase font-black text-gray-600 mb-2 block">Línea</label>
                         <select className="w-full bg-black border border-gray-800 p-4 rounded-xl text-xs font-bold uppercase"
                           value={transaction.line} onChange={(e) => setTransaction({...transaction, line: e.target.value})}>
                           <option value="Premium">Premium</option>
@@ -270,11 +264,6 @@ const Logistica = () => {
                         <input type="number" required className="w-full bg-black border border-gray-800 p-4 rounded-xl font-mono text-green-500"
                           value={transaction.newPrice} onChange={(e) => setTransaction({...transaction, newPrice: e.target.value})} />
                       </div>
-                    </div>
-                    <div>
-                      <label className="text-[10px] uppercase font-black text-gray-600 mb-2 block">Descripción (Obligatorio)</label>
-                      <input type="text" className="w-full bg-black border border-gray-800 p-4 rounded-xl text-[10px] font-bold"
-                        value={transaction.desc} onChange={(e) => setTransaction({...transaction, desc: e.target.value})} />
                     </div>
                     <div>
                       <label className="text-[10px] uppercase font-black text-gray-600 mb-2 block">Stock Inicial</label>

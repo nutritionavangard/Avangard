@@ -6,15 +6,14 @@ const productSchema = new mongoose.Schema({
         required: true,
         trim: true 
     },
-    // Eslogan corto (ej: "ENERGÍA EXPLOSIVA") usado en DetalleProducto.jsx
     tagline: {
         type: String,
         trim: true
     },
-    // Usamos 'desc' para que coincida exactamente con la prop que espera tu ProductCard.jsx
+    // Quitamos el required para que no de error si va vacío
     desc: { 
-        type: String, 
-        required: true 
+        type: String,
+        default: "" 
     },
     line: { 
         type: String, 
@@ -33,13 +32,11 @@ const productSchema = new mongoose.Schema({
         type: String, 
         default: 'Equine' 
     },
-    // Stock actual disponible (Sincronizado con el modelo Stock)
     qty: { 
         type: Number, 
         default: 0,
         min: 0 
     },
-    // Campo para el color de la UI (ej: #D4AF37 para Premium o #2563eb para Professional)
     color: {
         type: String
     }
