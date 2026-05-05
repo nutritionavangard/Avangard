@@ -257,6 +257,7 @@ const Logistica = () => {
                           value={transaction.line} onChange={(e) => setTransaction({...transaction, line: e.target.value})}>
                           <option value="Premium">Premium</option>
                           <option value="Professional">Professional</option>
+                          <option value="Standard">Standard</option>
                         </select>
                       </div>
                       <div>

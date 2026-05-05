@@ -17,7 +17,7 @@ const productSchema = new mongoose.Schema({
     },
     line: { 
         type: String, 
-        enum: ['Professional', 'Premium'], 
+        enum: ['Professional', 'Premium', 'Standard'], 
         required: true 
     },
     price: { 
