@@ -7,7 +7,6 @@ import imgEquitacion from '../assets/Premium BAL Equitacion.png';
 import imgPolo from '../assets/Premium BAL POLO.png';
 import imgPotrillos from '../assets/Premium BAL Potrillos.png';
 import imgPSC from '../assets/Premium BAL PSC.png';
-import imgVigor from '../assets/Premium BAL Vigor.png';
 import imgYeguas from '../assets/Premium BAL Yeguas.png';
 import imgMantenimiento from '../assets/Professional BAL Mantenimiento.png';
 import imgDeporte from '../assets/Professional BAL Deporte.png';
@@ -22,7 +21,6 @@ const Catalogo = () => {
     { _id: 'yeguas', name: 'BAL YEGUAS', line: 'PREMIUM', image: imgYeguas, tagline: 'Reproducción y Cría' },
     { _id: 'potrillos', name: 'BAL POTRILLOS', line: 'PREMIUM', image: imgPotrillos, tagline: 'Crecimiento Óptimo' },
     { _id: 'equitacion', name: 'BAL EQUITACION', line: 'PREMIUM', image: imgEquitacion, tagline: 'Salto y Adiestramiento' },
-    { _id: 'vigor', name: 'BAL VIGOR', line: 'PREMIUM', image: imgVigor, tagline: 'Fuerza Muscular' },
     { _id: 'mantenimiento', name: 'BAL MANTENIMIENTO', line: 'PROFESSIONAL', image: imgMantenimiento, tagline: 'Salud Diaria' },
     { _id: 'deporte', name: 'BAL DEPORTE', line: 'PROFESSIONAL', image: imgDeporte, tagline: 'Resistencia Vital' }
   ];

@@ -7,7 +7,6 @@ import imgEquitacion from '../assets/Premium BAL Equitacion.png';
 import imgPolo from '../assets/Premium BAL POLO.png';
 import imgPotrillos from '../assets/Premium BAL Potrillos.png';
 import imgPSC from '../assets/Premium BAL PSC.png';
-import imgVigor from '../assets/Premium BAL Vigor.png';
 import imgYeguas from '../assets/Premium BAL Yeguas.png';
 
 // Importación de imágenes - Línea Professional
