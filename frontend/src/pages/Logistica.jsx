@@ -35,14 +35,12 @@ const Logistica = () => {
 
   const fetchProducts = async () => {
     try {
-      // No reseteamos loading a true aquí para evitar parpadeos en cada recarga
       setErrorStatus(null);
       const response = await API.get('/products');
       setStock(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
       console.error("Error de conexión:", error);
       setErrorStatus("Sincronizando con la terminal...");
-      // Reintento automático más corto para mejorar la experiencia
       setTimeout(fetchProducts, 5000);
     } finally {
       setLoading(false);
@@ -66,13 +64,14 @@ const Logistica = () => {
       if (modalType === 'nuevo') {
         response = await API.post('/products', {
           name: transaction.name, 
-          qty: Number(transaction.qty), // Forzamos número
+          qty: Number(transaction.qty), 
           line: transaction.line, 
           price: Number(transaction.newPrice),
           color: '#D4AF37'
         });
       } else if (modalType === 'precio') {
-        response = await API.put(`/stock/price/${selectedProduct._id}`, 
+        // CAMBIO CRÍTICO: Se usa la ruta /products/:id para actualizar el precio
+        response = await API.put(`/products/${selectedProduct._id}`, 
           { price: Number(transaction.newPrice) });
       } else {
         response = await API.post('/stock/update', { 
@@ -89,21 +88,22 @@ const Logistica = () => {
         date: new Date().toLocaleString('es-AR'),
         product: modalType === 'nuevo' ? transaction.name : selectedProduct.name,
         type: modalType === 'nuevo' ? 'ingreso' : modalType,
-        qty: Number(transaction.qty),
-        recipient: transaction.recipient || 'Depósito Central',
+        qty: modalType === 'precio' ? 0 : Number(transaction.qty),
+        recipient: modalType === 'precio' ? 'Ajuste de Valor' : (transaction.recipient || 'Depósito Central'),
       };
       
-      if (modalType !== 'precio') setLogs(prev => [newLog, ...prev]);
+      // No agregamos log si es solo cambio de precio para no ensuciar el historial de stock
+      if (modalType !== 'precio') {
+        setLogs(prev => [newLog, ...prev]);
+      }
 
-      // Refrescamos datos
       await fetchProducts();
       setIsModalOpen(false);
-      // Reset de formulario
       setTransaction({ qty: '', recipient: '', newPrice: '', name: CATALOGO_PRODUCTOS[0], line: 'Professional' });
 
     } catch (error) {
       console.error("Error en operación:", error);
-      const msg = error.response?.data?.message || "Error de red. Verifica tu conexión.";
+      const msg = error.response?.data?.message || "Error al procesar la solicitud.";
       alert(msg);
     } finally {
       setIsSubmitting(false);
