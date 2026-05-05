@@ -14,7 +14,7 @@ import imgDeporte from '../assets/Professional BAL Deporte.png';
 const Catalogo = () => {
   const [lineaActiva, setLineaActiva] = useState('PREMIUM');
 
-  // Se actualizaron los _id para que coincidan con las rutas de detalle (polo, equitacion, etc.)
+  // Se eliminó BAL VIGOR de esta lista
   const productosEstaticos = [
     { _id: 'polo', name: 'BAL POLO', line: 'PREMIUM', image: imgPolo, tagline: 'Energía Máxima' },
     { _id: 'psc', name: 'BAL PSC', line: 'PREMIUM', image: imgPSC, tagline: 'Alta Performance' },

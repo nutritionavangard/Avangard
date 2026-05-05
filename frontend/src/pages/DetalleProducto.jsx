@@ -174,23 +174,6 @@ const productosData = {
     ],
     ingredientes: "maíz, avena, cebada, pellet de soja, poroto de soja desactivado, afrechillo de trigo, harina de alfalfa, carbonato de calcio, fosfato mono-bicálcico, cloruro de sodio, óxido de magnesio, microminerales, aminoácidos, vitaminas, antioxidantes, secuestrante de micotoxinas, levadura y saborizantes."
   },
-  "vigor": { 
-    name: "BAL. VIGOR", 
-    img: imgVigor, 
-    color: "#D4AF37", 
-    tagline: "SUPLEMENTO ENERGÉTICO",
-    desc: "Diseñado para caballos con alta demanda física, este suplemento aporta una densidad calórica superior. Su fórmula exclusiva ayuda a mantener la condición corporal durante temporadas de competencia intensa.",
-    recomendacion: "Se recomienda utilizar a un nivel del 0,5 al 1% del peso vivo, repartido en dos comidas diarias.",
-    nutricion: [
-      { label: "Proteína", value: "12 %" }, { label: "Energía Digestible", value: "3.100 Kcal" },
-      { label: "Humedad", value: "10 %" }, { label: "Calcio", value: "0,70 %" },
-      { label: "Fósforo", value: "0,60 %" }
-    ],
-    aminoacidos: [
-      { label: "Lisina", value: "0,65" }, { label: "Metionina", value: "0,22" }
-    ],
-    ingredientes: "Maíz, aceites vegetales, afrechillo de arroz, pellet de soja, vitaminas y minerales."
-  },
   "mantenimiento": { 
     name: "BAL. MANTENIMIENTO", 
     img: imgMantenimiento, 
@@ -286,7 +269,6 @@ const DetalleProducto = () => {
             </div>
 
             <div className="flex items-center justify-start border-t border-gray-900 pt-8">
-              {/* Se cambió el botón por un Link a la página de contacto */}
               <Link 
                 to="/contacto"
                 className="bg-white text-black px-12 py-5 font-black uppercase text-sm tracking-widest transition-all duration-500 hover:text-white inline-block text-center"
