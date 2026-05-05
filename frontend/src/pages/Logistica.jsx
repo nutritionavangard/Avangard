@@ -24,9 +24,16 @@ const Logistica = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalType, setModalType] = useState('ingreso'); 
   const [selectedProduct, setSelectedProduct] = useState(null);
+  
+  // Estado inicial ajustado a tu esquema de MongoDB
   const [transaction, setTransaction] = useState({ 
-    qty: '', recipient: '', newPrice: '', 
-    name: CATALOGO_PRODUCTOS[0], line: 'Professional' 
+    qty: '', 
+    recipient: '', 
+    newPrice: '', 
+    name: CATALOGO_PRODUCTOS[0], 
+    line: 'Premium',
+    tagline: 'MÁXIMO RENDIMIENTO',
+    category: 'Equine'
   });
   
   const [loading, setLoading] = useState(true);
@@ -62,17 +69,24 @@ const Logistica = () => {
     try {
       let response;
       if (modalType === 'nuevo') {
+        // Enviamos TODOS los campos del esquema de tu imagen
         response = await API.post('/products', {
           name: transaction.name, 
-          qty: Number(transaction.qty), 
+          tagline: transaction.tagline,
+          desc: "",
           line: transaction.line, 
           price: Number(transaction.newPrice),
-          color: '#D4AF37'
+          category: transaction.category,
+          qty: Number(transaction.qty), 
+          color: '#D4AF37',
+          active: true
         });
       } else if (modalType === 'precio') {
-        // CAMBIO CRÍTICO: Se usa la ruta /products/:id para actualizar el precio
-        response = await API.put(`/products/${selectedProduct._id}`, 
-          { price: Number(transaction.newPrice) });
+        // Actualizamos manteniendo la integridad del esquema
+        response = await API.put(`/products/${selectedProduct._id}`, {
+          ...selectedProduct,
+          price: Number(transaction.newPrice) 
+        });
       } else {
         response = await API.post('/stock/update', { 
           productId: selectedProduct._id,
@@ -92,23 +106,28 @@ const Logistica = () => {
         recipient: modalType === 'precio' ? 'Ajuste de Valor' : (transaction.recipient || 'Depósito Central'),
       };
       
-      // No agregamos log si es solo cambio de precio para no ensuciar el historial de stock
-      if (modalType !== 'precio') {
-        setLogs(prev => [newLog, ...prev]);
-      }
+      if (modalType !== 'precio') setLogs(prev => [newLog, ...prev]);
 
       await fetchProducts();
       setIsModalOpen(false);
-      setTransaction({ qty: '', recipient: '', newPrice: '', name: CATALOGO_PRODUCTOS[0], line: 'Professional' });
+      
+      // Reset con valores por defecto del esquema
+      setTransaction({ 
+        qty: '', recipient: '', newPrice: '', 
+        name: CATALOGO_PRODUCTOS[0], line: 'Premium', 
+        tagline: 'MÁXIMO RENDIMIENTO', category: 'Equine' 
+      });
 
     } catch (error) {
-      console.error("Error en operación:", error);
-      const msg = error.response?.data?.message || "Error al procesar la solicitud.";
-      alert(msg);
+      console.error("Error detallado:", error.response?.data);
+      alert(`Error del Servidor: ${error.response?.data?.message || "Revisa los campos obligatorios"}`);
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  // ... (El resto del renderizado es idéntico al anterior, pero ahora es compatible con tu BD)
+  // [CÓDIGO DE RENDERIZADO OMITIDO POR BREVEDAD, SE MANTIENE EL MISMO ESTILO VISUAL]
 
   if (loading && stock.length === 0) return (
     <div className="min-h-screen bg-black flex flex-col items-center justify-center text-[#D4AF37]">
@@ -234,8 +253,8 @@ const Logistica = () => {
                         <label className="text-[10px] uppercase font-black text-gray-600 mb-2 block">Línea</label>
                         <select className="w-full bg-black border border-gray-800 p-4 rounded-xl text-xs font-bold uppercase"
                           value={transaction.line} onChange={(e) => setTransaction({...transaction, line: e.target.value})}>
-                          <option value="Professional">Professional</option>
                           <option value="Premium">Premium</option>
+                          <option value="Professional">Professional</option>
                           <option value="Standard">Standard</option>
                         </select>
                       </div>
