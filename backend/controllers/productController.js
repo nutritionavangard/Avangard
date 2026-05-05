@@ -23,10 +23,10 @@ exports.createProduct = async (req, res) => {
             tagline,
             desc: desc || description, 
             line, 
-            price: Number(price) || 0, // Aseguramos número
+            price: Number(price) || 0,
             image,
             color, 
-            qty: Number(qty) || 0 // Aseguramos número
+            qty: Number(qty) || 0 
         });
 
         const createdProduct = await product.save();
@@ -69,11 +69,9 @@ exports.updateProduct = async (req, res) => {
         const product = await Product.findById(req.params.id);
 
         if (product) {
-            // Sincronización de campos con conversión de tipos para evitar Error 400
             product.name = name || product.name;
             product.tagline = tagline || product.tagline;
             
-            // CONVERSIÓN EXPLÍCITA A NÚMERO
             if (price !== undefined) product.price = Number(price);
             if (qty !== undefined) product.qty = Number(qty);
             
@@ -87,10 +85,39 @@ exports.updateProduct = async (req, res) => {
             res.status(404).json({ message: 'Producto no encontrado' });
         }
     } catch (error) {
-        // Imprimimos el error en consola para que puedas verlo en los logs de Render
         console.error("Error al actualizar:", error.message);
         res.status(400).json({ 
             message: 'Error al actualizar el producto', 
+            details: error.message 
+        });
+    }
+};
+
+// @desc    Eliminar producto y su stock asociado
+// @route   DELETE /api/products/:id
+exports.deleteProduct = async (req, res) => {
+    try {
+        const productId = req.params.id;
+
+        // 1. Buscamos y eliminamos el producto del catálogo
+        const productDeleted = await Product.findByIdAndDelete(productId);
+
+        if (!productDeleted) {
+            return res.status(404).json({ message: 'El producto no existe en el catálogo' });
+        }
+
+        // 2. Eliminamos también el registro de Stock vinculado para evitar basura en la DB
+        await Stock.findOneAndDelete({ product: productId });
+
+        res.json({ 
+            message: 'Producto y registros de stock eliminados correctamente',
+            id: productId 
+        });
+
+    } catch (error) {
+        console.error("Error al eliminar:", error.message);
+        res.status(500).json({ 
+            message: 'Error interno al intentar eliminar el producto',
             details: error.message 
         });
     }
