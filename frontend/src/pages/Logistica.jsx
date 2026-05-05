@@ -68,7 +68,7 @@ const Logistica = () => {
     try {
       let response;
       if (modalType === 'nuevo') {
-        // Estructura exacta según tu JSON de base de datos
+        // Alta con los campos exactos del JSON de tu base de datos
         response = await API.post('/products', {
           name: transaction.name, 
           tagline: transaction.tagline,
@@ -81,14 +81,23 @@ const Logistica = () => {
           active: true
         });
       } else if (modalType === 'precio') {
-        // LIMPIEZA CRÍTICA: Extraemos _id y __v para no enviarlos en el body
-        const { _id, __v, ...datosLimpios } = selectedProduct;
-        
-        response = await API.put(`/products/${_id}`, {
-          ...datosLimpios,
-          price: Number(transaction.newPrice) 
-        });
+        // LIMPIEZA TOTAL: Enviamos un objeto construido de cero
+        // Esto garantiza que no viaje el _id, ni el __v, ni fechas automáticas en el body.
+        const payload = {
+          name: selectedProduct.name,
+          tagline: selectedProduct.tagline || 'MÁXIMO RENDIMIENTO',
+          desc: selectedProduct.desc || "",
+          line: selectedProduct.line,
+          price: Number(transaction.newPrice), // El valor que estamos cambiando
+          category: selectedProduct.category || "Equine",
+          qty: Number(selectedProduct.qty),
+          color: selectedProduct.color || "#D4AF37",
+          active: selectedProduct.active !== undefined ? selectedProduct.active : true
+        };
+
+        response = await API.put(`/products/${selectedProduct._id}`, payload);
       } else {
+        // Ingreso o Egreso
         response = await API.post('/stock/update', { 
           productId: selectedProduct._id,
           type: modalType === 'ingreso' ? 'Ingreso' : 'Egreso',
@@ -119,7 +128,8 @@ const Logistica = () => {
 
     } catch (error) {
       console.error("Error detallado:", error.response?.data);
-      alert(`Error: ${error.response?.data?.message || "Error de validación de esquema"}`);
+      // Mostramos el mensaje exacto del backend para depurar si falla de nuevo
+      alert(`Error ${error.response?.status}: ${error.response?.data?.message || JSON.stringify(error.response?.data)}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -201,7 +211,6 @@ const Logistica = () => {
             ))}
           </div>
 
-          {/* Historial Lateral */}
           <div className="bg-[#080808] rounded-3xl border border-gray-900 p-6 h-[600px] flex flex-col sticky top-24">
             <h2 className="flex items-center justify-between text-[10px] font-black uppercase tracking-[0.3em] text-[#D4AF37] mb-8">
               <span className="flex items-center gap-2"><History size={14} /> Historial</span>
